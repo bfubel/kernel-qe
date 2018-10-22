@@ -1,9 +1,15 @@
 pipeline {
+    agent any
     stages {
-        stage('build') {
+        stage('Example') {
             steps {
-                sh 'python --version'
+                echo 'Hello World'
             }
+        }
+    }
+    post { 
+        always { 
+            echo 'I will always say Hello again!'
         }
     }
 }
