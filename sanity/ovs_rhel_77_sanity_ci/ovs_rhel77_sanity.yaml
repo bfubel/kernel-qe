@@ -1,0 +1,278 @@
+- job-template:
+    name: 'sanity/kernel-qe-ovs-ci-rhel77-sanity'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        - string:
+            name: RPM_OVS
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.10/2.10.0/55.el7fdn/x86_64/openvswitch2.10-2.10.0-55.el7fdn.x86_64.rpm"
+            description: RPM_OVS brew location of OVS RPM
+        - string:
+            name: RPM_CONTAINER_SELINUX_POLICY
+            default: http://download-node-02.eng.bos.redhat.com/brewroot/packages/container-selinux/2.84/2.el7_6/noarch/container-selinux-2.84-2.el7_6.noarch.rpm
+            description: RPM_CONTAINER_SELINUX_POLICY brew location of OVS RPM
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_POLICY
+            default: http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/11.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-11.el7fdp.noarch.rpm
+            description: RPM_OVS_SELINUX_EXTRA_POLICY brew location of  RPM
+        - string:
+            name: fdp_release
+            default: FDP 18.11
+            description: fdp_release
+        - string:
+            name: compose
+            default: RHEL-7.7-20190723.1
+            description: compose
+        - string:
+            name: machine
+            default: netqe14.knqe.lab.eng.bos.redhat.com
+            description: machine
+        - string:
+            name: nic_port0
+            default: p1p1
+            description: First Nic port to use
+        - string:
+            name: nic_port1
+            default: p1p2
+            description: Second Nic port to use
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        # - string:
+        #     name: CLIENT
+        #     default: Server
+        #     description: Distro
+        # - string:
+        #     name: BREW_TASKID
+        #     default: '21199235'
+        #     description: 'OVS brew build ID for manual trigger. Example: 21199235. '
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+    builders:
+        - shell: |
+            #!/bin/bash
+            echo '****************************** Submit Beaker jobs ************************'
+            cat $WORKSPACE/job1.properties
+            # Use the OVS RPM in the Build parameters
+            # echo 'BREW_ID='$BREW_ID
+            # echo 'build='$build
+            # rpm_location=`brew buildinfo $BREW_ID | grep $build |grep $ARCH`
+            # echo 'OVS_RPM='$rpm_location
+            # echo "$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            # RPM_OVS="$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            echo 'RPM_OVS='$RPM_OVS
+
+            rm -f $WORKSPACE/job1.properties
+            rm -f $WORKSPACE/job1html.txt
+            fdp_release="FDP 18.11"
+            #compose="RHEL-7.7"
+            RPM_OVS_SELINUX_EXTRA_POLICY=http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/7.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-7.el7fdp.noarch.rpm
+
+            ##########################
+            #Sanity Test 1: sanity_check#
+            ##########################
+            rm -f $WORKSPACE/job1html.txt
+            echo "Test 1: sanity_check =============================================="
+            rhos_test_version="14"
+            cd /mnt/tests/kernel/networking/openvswitch/sanity_check
+            lstest | runtest $compose --variant=client --arch=$ARCH --machine=$machine --systype=machine --param=RPM_CONTAINER_SELINUX_POLICY=$RPM_CONTAINER_SELINUX_POLICY --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY --param=RPM_OVS=$RPM_OVS  --param=NAY='YES' --wb=" $machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, openvswitch/sanity_check" |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Sanity Test 2: sellinux Test#
+            ##########################
+            rm -f $WORKSPACE/job2html.txt
+            echo "Test 2: selinux =============================================="
+            cd /mnt/tests/kernel/networking/ovs-dpdk-selinux
+            #OVS="ovs2.10"
+            FDP="fdp"
+            #NIC="ixgbe"
+            #nic_port0="p1p1"
+            #nic_port1="p1p2"
+            lstest | runtest $compose  --variant=server --arch=x86_64 --machine=$machine --systype=machine --param=nic_port0=$nic_port0 --param=nic_port1=$nic_port1 --cmd="yum install -y policycoreutils-python $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_CONTAINER_SELINUX_POLICY $RPM_OVS http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.101/1.el7fdp/noarch/driverctl-0.101-1.el7fdp.noarch.rpm" --wb "$machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, ovs-dpdk-selinux"|tee $WORKSPACE/bkr_job2.txt
+
+
+            grep Submitted $WORKSPACE/bkr_job2.txt >$WORKSPACE/bkr_jobnum2.txt
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job2html.txt
+            BKR_JOBID2html=`cut -d\: -f2 $WORKSPACE/job2html.txt`
+            echo 'BKR_JOBID2html='$BKR_JOBID2html >> $WORKSPACE/job1.properties
+
+
+            ##########################
+            #Sanity Test 3: vsperf_CI #
+            ##########################
+            rm -f $WORKSPACE/job3html.txt
+            echo "Test 3: Sanity vsperf_CI=============================================="
+            cd /mnt/tests/kernel/networking/vsperf/vsperf_CI
+            #compose="RHEL-7.6"
+            #OVS="ovs2.10"
+            SPEED="10g"
+            TGEN="xena"
+            TEST="sanity"  #(nightly/weekly/gating)
+            NIC="ixgbe"
+            XENA_IP="10.19.15.19"
+            XENA_MODULE1="3"
+            XENA_MODULE2="3"
+            NetScout_nic1="Netqe13_p1p1"
+            NetScout_nic2="Netqe13_p1p2"
+            #NIC1="p1p1"
+            #NIC2="p1p2"
+            lstest | runtest  $compose --variant=server --arch=$ARCH --machine=$machine --systype=machine --param=NAY='YES' --param=dbg_flag="set -x" --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY --param=RPM_OVS=$RPM_OVS --cmd="yum install -y policycoreutils-python $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_CONTAINER_SELINUX_POLICY $RPM_OVS " --wb "$machine,$compose, $BUILD_URL networking/vsperf ,$TEST CI used $TGEN sender $speed $NIC nic $OVS"|tee $WORKSPACE/bkr_job3.txt
+            grep Submitted $WORKSPACE/bkr_job3.txt >$WORKSPACE/bkr_jobnum3.txt
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job3html.txt
+            BKR_JOBID3html=`cut -d\: -f2 $WORKSPACE/job3html.txt`
+            echo 'BKR_JOBID3html='$BKR_JOBID3html >> $WORKSPACE/job1.properties
+            # Notes: removed nic_port0,1 and nic_port0,1 and NIC from job2 and job3 
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo $BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $BKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+
+            #!/bin/bash -x
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID2
+            bkr job-results --format junit-xml $BKR_JOBID2 > $WORKSPACE/jobid1.xml
+            TESTS_JOB2=$(grep 'testsuite name' $WORKSPACE/jobid2.xml)
+            echo $TESTS_JOB2
+
+            #####################################################################
+            # Get Beaker Job 2 job-results
+            #####################################################################
+            BKR_TESTS_JOB2_EXEC=0
+            BKR_TESTS_JOB2_FAILED=0
+            for jobid in $BKR_JOBID2; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid2.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid2.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB2_EXEC=$((BKR_TESTS_JOB2_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB2_FAILED=$((BKR_TESTS_JOB2_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB2_EXEC=$BKR_TESTS_JOB2_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB2_FAILED=$BKR_TESTS_JOB2_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB2=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB2_EXEC"'", "failed": "'"$BKR_TESTS_JOB2_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB2
+            echo "BKR_TESTS_JOB2=$BKR_TESTS_JOB2" >> $WORKSPACE/job1.properties
+
+            #echo $?
+            #!/bin/bash -x
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID3
+            #echo $?
+            bkr job-results --format junit-xml $BKR_JOBID3 > $WORKSPACE/jobid3.xml
+            TESTS_JOB3=$(grep 'testsuite name' $WORKSPACE/jobid3.xml)
+            echo $TESTS_JOB3
+
+            #####################################################################
+            # Get Beaker Job 3 job-results
+            #####################################################################
+            BKR_TESTS_JOB3_EXEC=0
+            BKR_TESTS_JOB3_FAILED=0
+            for jobid in $BKR_JOBID3; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid3.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid3.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB3_EXEC=$((BKR_TESTS_JOB3_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB3_FAILED=$((BKR_TESTS_JOB3_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB3_EXEC=$BKR_TESTS_JOB3_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB3_FAILED=$BKR_TESTS_JOB3_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB3=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB3_EXEC"'", "failed": "'"$BKR_TESTS_JOB3_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB3
+            echo "BKR_TESTS_JOB3=$BKR_TESTS_JOB3" >> $WORKSPACE/job1.properties
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+    publishers:
+        # - postbuildscript:
+        #    builders:
+        #       - shell: 'echo "Shell execution"'
+ #           publishers:
+         # - postbuildscript:
+         #    mark-unstable-if-failed: true
+            # builders:
+            #   build-on:
+            #     - SUCCESS
+            #     - UNSTABLE
+                # build-steps:
+                #   - shell: |
+                #       #!/bin/bash
+                #       echo "Jenkins job failed or canceled - canceling any submitted Beaker jobs"
+                #       bkr job-cancel ${{BKR_JOBID1}}
+#       - postbuildscript:
+        - email-ext:
+            recipients: bfubel@redhat.com
+            subject: sanity/kernel-qe-ovs-ci-rhel77-sanity $machine, $compose, $BUILD_URL RPM_OVS
+            body: |
+              Beaker Job "kernel/networking/Sanity_Check" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+              Beaker Job "kernel/networking/ovs-dpdk-selinux" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID2html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB2_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB2_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB2"}}
+              Beaker Job "kernel/networking/vsperf_CI" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID3html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB3_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+        - workspace-cleanup:
+        #   include:
+        #       - "*"
+        #   exclude:
+        #       #need resources file to trigger teardown job
+        #       - "job1.properties.txt"
+        #   dirmatch: true
+            clean-if:
+                - success: true
+                - not-built: true
+
+
+- project:
+    name: kernel-qe
+    jobs:
+      - 'sanity/kernel-qe-ovs-ci-rhel77-sanity'
