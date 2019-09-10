@@ -10,8 +10,12 @@
                 - bfubel
     parameters:
         - string:
+            name: NOTES
+            default: ""
+            description: Run Notes
+        - string:
             name: RPM_OVS
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.10/2.10.0/55.el7fdn/x86_64/openvswitch2.10-2.10.0-55.el7fdn.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/117.el7fdp/x86_64/openvswitch-2.9.0-117.el7fdp.x86_64.rpm"
             description: RPM_OVS brew location of OVS RPM
         - string:
             name: RPM_CONTAINER_SELINUX_POLICY
@@ -25,10 +29,10 @@
             name: fdp_release
             default: FDP 18.11
             description: fdp_release
-        # - string:
-        #     name: compose
-        #     default: RHEL-7.6
-        #     description: compose
+        - string:
+           name: compose
+           default: RHEL-7.7-updates-20190813.0
+           description: compose
         - string:
             name: machine
             default: netqe13.knqe.lab.eng.bos.redhat.com
@@ -57,8 +61,8 @@
         - ci-trigger:
             # Sample job trigger for official Brew builds
             # Build NVR in $name $version $release
-            jms-selector: CI_TYPE = 'tier-2-validation-testing-done' AND CI_NAME ='rtt-accepted-publisher' AND PRODUCT = 'RHEL' AND VERSION LIKE '7.%' AND TYPE = 'nightly'
-            override-topic: "Consumer.rh-jenkins-ci-plugin.bfubel-kernelqe-a594694962c64b099101c2f48637b18b.VirtualTopic.eng.rtt.ci.>"
+            jms-selector: CI_TYPE = 'tier-2-validation-testing-done' AND CI_NAME ='rtt-accepted-publisher' AND PRODUCT = 'RHEL' AND VERSION LIKE '7.7%' AND TYPE = 'nightly'
+            override-topic: "Consumer.rh-jenkins-ci-plugin.bfubel-kernelqe-535abf8f1e894a828193410363bae187.VirtualTopic.eng.rtt.ci.>"
 
     wrappers:
         - build-name:
@@ -66,7 +70,7 @@
     builders:
         - shell: |
             #!/bin/bash
-            echo 'Build Shell 1'
+            echo 'Parse JMS CI_MESSAGE **************************************************'
             echo 'WORKSPACE='$WORKSPACE
             KEYTAB="/etc/jenkins.keytab-kernel-qe-jenkins.rhev-ci-vms.eng.rdu2.redhat.com"
             PRINCIPAL="jenkins/kernel-qe-jenkins.rhev-ci-vms.eng.rdu2.redhat.com@REDHAT.COM"
@@ -75,40 +79,36 @@
             # remove values from previous build
             > $WORKSPACE/CI_MESSAGE_ENV.txt
 
-            echo compose=$(bkr distro-trees-list --name=RHEL-7.7% --limit=1 | grep Name | awk '{{print $2}}') >> "$WORKSPACE/job1.properties"
-
+            #echo compose=$(bkr distro-trees-list --name=RHEL-7.7% --limit=1 | grep Name | awk '{{print $2}}') >> "$WORKSPACE/job1.properties"
+            #echo compose=$compose >> $WORKSPACE/job1.properties 
+            #echo compose=$compose
             if ! [ -z "${{CI_MESSAGE}}" ]
             then
               echo "CI trigger!*******************************************************"
-              echo ${{CI_MESSAGE}} | tee "$WORKSPACE/CI_MESSAGE.txt"
-              echo ${{CI_MESSAGE}} | tee "$WORKSPACE/CI_MESSAGE.json"
+              echo ${{CI_MESSAGE}} | tee $WORKSPACE/CI_MESSAGE.txt
+              echo $CI_MESSAGE | tee $WORKSPACE/CI_MESSAGE.json
+              compose=$(bkr distro-trees-list --name=RHEL-7.7% --limit=1 | grep Name | awk '{{print $2}}') 
+              echo compose=$compose >> $WORKSPACE/job1.properties 
               #Parsing BREW TASK ID
-              RE_TASK_ID='"id": ([0-9]+),'
-              if [[  $CI_MESSAGE =~ $RE_TASK_ID ]]
-              then
-                echo "Brew task id parsed to be ${{BASH_REMATCH[1]}}"
-                BREW_TASKID=${{BASH_REMATCH[1]}}
-                echo "BREW_TASKID=${{BREW_TASKID}}" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
-              else
-                echo "Id searched with regex '${{RE_TASK_ID}}' was not found!"
-                return 1 2> /dev/null || exit 1
-              fi
+              # echo "Setting RE_TASK_ID"
+              # RE_TASK_ID='"id": ([0-9]+),'
+              # if [[  $CI_MESSAGE =~ $RE_TASK_ID ]]
+              # then
+              #   echo "Brew task id parsed to be ${{BASH_REMATCH[1]}}"
+              #   BREW_TASKID=${{BASH_REMATCH[1]}}
+              #   echo "BREW_TASKID=${{BREW_TASKID}}" >>  $WORKSPACE/CI_MESSAGE_ENV.txt
+              # else
+              #   echo "Id searched with regex '${{RE_TASK_ID}}' was not found!"
+              #   return 1 2> /dev/null || exit 1
+              # fi
             else
-              echo "Manual trigger!"
+              echo "Manual trigger!**************************************************"
+              echo compose=$compose
               echo "Brew task id is ${{BREW_TASKID}}"
-              echo "BREW_TASKID=${{BREW_TASKID}}" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
+              echo "BREW_TASKID=${{BREW_TASKID}}" >>  $WORKSPACE/CI_MESSAGE_ENV.txt
+              echo "Compose=${{compose}}" >> $WORKSPACE/job1.properties
+              echo "compose=$compose" >> $WORKSPACE/job1.properties 
             fi
-            # Removed since not Building with OVS trigger
-            # owner=`brew taskinfo ${{BREW_TASKID}} | sed -n 's/Owner: //p'`
-            # echo "owner=$owner" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
-            # echo "triggered_by=$BUILD_USER_ID" >> "$WORKSPACE/CI_MESSAGE_ENV.txt"
-            # echo 'Setting owner Email'
-            # echo 'Owner='$owner
-            # owner_email="$owner@redhat.com"
-            # echo 'owner_email='$owner_email
-            # echo 'owner_email='$owner_email >> "$WORKSPACE/job1.properties"
-            # pushd "$WORKSPACE"
-            # rm -f *.xml
 
         - inject:
             properties-file: $WORKSPACE/job1.properties
@@ -139,7 +139,9 @@
             echo "Test 1: sanity_check =============================================="
             rhos_test_version="14"
             cd /mnt/tests/kernel/networking/openvswitch/sanity_check
-            lstest | runtest $compose --variant=client --arch=$ARCH --machine=$machine --systype=machine --param=RPM_CONTAINER_SELINUX_POLICY=$RPM_CONTAINER_SELINUX_POLICY --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY --param=RPM_OVS=$RPM_OVS  --param=NAY='YES' --wb=" $machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, openvswitch/sanity_check" |tee $WORKSPACE/bkr_job1.txt
+            lstest | runtest $compose --variant=client --arch=$ARCH --machine=$machine --systype=machine --param=dbg_flag="set -x" \
+            --param=RPM_CONTAINER_SELINUX_POLICY=$RPM_CONTAINER_SELINUX_POLICY --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY \
+            --param=RPM_OVS=$RPM_OVS  --param=NAY='YES' --wb=" $machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, openvswitch/sanity_check" |tee $WORKSPACE/bkr_job1.txt
             grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
             BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
             echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
@@ -159,9 +161,9 @@
             #NIC="ixgbe"
             #nic_port0="p1p1"
             #nic_port1="p1p2"
-            lstest | runtest $compose  --variant=server --arch=x86_64 --machine=$machine --systype=machine --param=nic_port0=$nic_port0 --param=nic_port1=$nic_port1 --cmd="yum install -y policycoreutils-python $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_CONTAINER_SELINUX_POLICY $RPM_OVS http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.101/1.el7fdp/noarch/driverctl-0.101-1.el7fdp.noarch.rpm" --wb "$machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, ovs-dpdk-selinux"|tee $WORKSPACE/bkr_job2.txt
-
-
+            lstest | runtest $compose  --variant=server --arch=x86_64 --machine=$machine --systype=machine --param=dbg_flag="set -x" \
+            --param=nic_port0=$nic_port0 --param=nic_port1=$nic_port1 --cmd="yum install -y policycoreutils-python $RPM_OVS_SELINUX_EXTRA_POLICY \
+            $RPM_CONTAINER_SELINUX_POLICY $RPM_OVS http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.101/1.el7fdp/noarch/driverctl-0.101-1.el7fdp.noarch.rpm" --wb "$machine, $compose, $BUILD_URL $fdp_release, $ovs_rpm_name, ovs-dpdk-selinux"|tee $WORKSPACE/bkr_job2.txt
             grep Submitted $WORKSPACE/bkr_job2.txt >$WORKSPACE/bkr_jobnum2.txt
             BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
             echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
@@ -174,22 +176,11 @@
             #Sanity Test 3: vsperf_CI #
             ##########################
             rm -f $WORKSPACE/job3html.txt
-            echo "Test 3: Sanity vsperf_CI=============================================="
-            cd /mnt/tests/kernel/networking/vsperf/vsperf_CI
-            #compose="RHEL-7.6"
-            #OVS="ovs2.10"
-            SPEED="10g"
-            TGEN="xena"
-            TEST="nightly"  #(nightly/weekly/gating)
-            NIC="ixgbe"
-            XENA_IP="10.19.15.19"
-            XENA_MODULE1="3"
-            XENA_MODULE2="3"
-            NetScout_nic1="Netqe13_p1p1"
-            NetScout_nic2="Netqe13_p1p2"
-            #NIC1="p1p1"
-            #NIC2="p1p2"
-            lstest | runtest  $compose --variant=server --arch=$ARCH --machine=$machine --systype=machine --param=NAY='YES' --param=dbg_flag="set -x" --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY --param=RPM_OVS=$RPM_OVS --cmd="yum install -y policycoreutils-python $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_CONTAINER_SELINUX_POLICY $RPM_OVS " --wb "$machine,$compose, $BUILD_URL networking/vsperf ,$TEST CI used $TGEN sender $speed $NIC nic $OVS"|tee $WORKSPACE/bkr_job3.txt
+            echo "Test 3: Sanity User_Space Commands =============================================="
+            cd /mnt/tests/kernel/networking/openvswitch/userspace_commands
+            lstest | runtest $compose --variant=server --arch=x86_64 --machine=$machine --systype=machine --param=dbg_flag="set -x" \
+            --param=RPM_OVS_SELINUX_EXTRA_POLICY=$RPM_OVS_SELINUX_EXTRA_POLICY --param=RPM_OVS=$RPM_OVS --cmd="yum install -y policycoreutils-python;rpm -ivh --force $RPM_OVS_SELINUX_EXTRA_POLICY" \
+            --wb=" $name RHEL77 nightly  $machine $BUILD_URL /n $fdp_release, $ovs_rpm_name, $compose, openvswitch/userspace_commands" |tee $WORKSPACE/bkr_job3.txt
             grep Submitted $WORKSPACE/bkr_job3.txt >$WORKSPACE/bkr_jobnum3.txt
             BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
             echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
@@ -304,8 +295,8 @@
                 #       bkr job-cancel ${{BKR_JOBID1}}
 #       - postbuildscript:
         - email-ext:
-            recipients: bfubel@redhat.com,ctrautma@redhat.com
-            subject: nightly/kernel-qe-ovs-ci-rhel77-nightly $machine, $compose, $BUILD_URL RPM_OVS
+            recipients: bfubel@redhat.com
+            subject: nightly/kernel-qe-ovs-ci-rhel77-nightly $machine, $Compose, $BUILD_URL $RPM_OVS
             body: |
               Beaker Job "kernel/networking/Sanity_Check" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
                           Results ${{ENV,var="BKR_TESTS_JOB1"}}
@@ -313,6 +304,22 @@
                           Results ${{ENV,var="BKR_TESTS_JOB2"}}
               Beaker Job "kernel/networking/vsperf_CI" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID3html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB3_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
                           Results ${{ENV,var="BKR_TESTS_JOB3"}}
+
+              
+              nightly/kernel-qe-ovs-ci-rhel77-nightly
+              Notes, ${{ENV,var="NOTES"}}
+              $BUILD_URL,Sanity_Check,${{ENV,var="BKR_TESTS_JOB1_EXEC"}},${{ENV,var="BKR_TESTS_JOB1_FAILED"}},ovs-dpdk-selinux,${{ENV,var="BKR_TESTS_JOB2_EXEC"}},${{ENV,var="BKR_TESTS_JOB2_FAILED"}},vsperf_CI,${{ENV,var="BKR_TESTS_JOB3_EXEC"}},${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+              Job Parameters
+              Compose,${{ENV,var="Compose"}}
+              RPM_OVS,${{ENV,var="RPM_OVS"}}
+              RPM_CONTAINER_SELINUX_POLICY,${{ENV,var="RPM_CONTAINER_SELINUX_POLICY"}}
+              RPM_OVS_SELINUX_EXTRA_POLICY,${{ENV,var="RPM_OVS_SELINUX_EXTRA_POLICY"}}
+              fdp_release,${{ENV,var="fdp_release"}}
+              machine,${{ENV,var="machine"}}
+              nic_port0,${{ENV,var="nic_port0"}}
+              nic_port1,${{ENV,var="nic_port1"}}
+              ARCH,${{ENV,var="ARCH"}}
+
             notify-every-unstable-build: false
             send-to-individuals: true
             always: true
@@ -332,3 +339,11 @@
     name: kernel-qe
     jobs:
       - 'nightly/kernel-qe-ovs-ci-rhel77-nightly'
+###########################################################
+#                        History                          #
+###########################################################
+#Date            Modifier    Details
+#14-Aug-2019    bfubel    Added -x for debug on runtest
+#                         Set default Machine to netqe14
+#                         Removed xena port setting on job 2
+#                         Want to get full pass on netqe14 while job is runnig on netqe13 

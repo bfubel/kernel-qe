@@ -123,7 +123,7 @@
             #echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
 
             #!/bin/bash -x
-            BKR_JOBID2=`cut $WORKSPACE/bkr_jobnum2.txt`
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
             echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
             bkr job-watch $BKR_JOBID2
             #echo $?
@@ -142,11 +142,11 @@
         #     #         echo "Jenkins job failed or canceled - canceling any submitted Beaker jobs"
         #     #         bkr job-cancel ${{BKR_JOBID1}}
         # - postbuildscript:
-        #       script-only-if-succeeded: False
-        #       script-only-if-failed: True
-        #         builders:
-        #           - shell: |
-        #               BKR_JOBID_NUM=`echo ${{BKR_JOBID1//J:/}}`
+        #     script-only-if-succeeded: False
+        #     script-only-if-failed: True
+        #     builders:
+        #         - shell: |
+        #             BKR_JOBID_NUM=`echo ${{BKR_JOBID1//J:/}}`
         #               echo "BKR_JOBID_NUM=${{BKR_JOBID_NUM// /+}}" >> $WORKSPACE/job1.properties
         #               BKR_TESTS_EXEC=0
         #               BKR_TESTS_FAILED=0
