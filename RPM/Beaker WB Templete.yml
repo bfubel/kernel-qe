@@ -1,5 +1,6 @@
 White Board Standard
               <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.90] [vsperf_nightly]  [ixgbe] [$CHOST] </whiteboard>
+                          [$TEST_INFO] [$COMPOSE_80] [OVS 2.11] [vsperf_vi-Gateing] [ixgbe] [$CHOST]
 
               $TEST_INFO
                 Auto
