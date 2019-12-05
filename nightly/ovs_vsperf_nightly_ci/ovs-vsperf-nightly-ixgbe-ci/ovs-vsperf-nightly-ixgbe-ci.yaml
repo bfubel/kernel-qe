@@ -1,0 +1,897 @@
+---
+######################################################################
+#   Job Name: VSPERF_CI Nightly IXGBE
+#   Test: /kernel/networking/vsperf/vsperf_CI
+#   DUT: netqe22.knqe.lab.eng.bos.redhat.com
+#   Traffic: 
+#   Test Bed: Performance 3
+# Netscout connection
+#  NETQE22_P7 P1 <--> XENA_M7 P0
+#  NETQE22_P7 P2 <--> XENA_M7 P1
+#        Results need traffic search beeker output for #
+#                ++ sum_pps=3855236                    #
+#                +++ echo 3855236/1000000              ##   
+#
+#
+######################################################################
+- job-template:
+    name: 'nightly/ovs_vsperf_nightly_ci/kernel-qe-ovs-vsperf-nightly-ixgbe-ci'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        - string:
+            name: COMPOSE_77
+            default: "RHEL-7.7-20190716.0"
+            description: "RHEL-7.7 compose"
+        - string:
+            name: COMPOSE_80
+            default: "RHEL-8.0.0-20190321.0"
+            description: "RHEL-8.0 Compose"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/13.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-13.el7fdp.noarch.rpm"
+            description: "RHEL-7.7 openvswitch-selinux-extra-policy rpm location"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/11.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-11.el8fdp.noarch.rpm"
+            description: "RHEL-8.0 openvswitch-selinux-extra-policy rpm location"
+        - string:
+            name: RPM_OVS290_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/122.el7fdp/x86_64/openvswitch-2.9.0-122.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.90 RPM"
+        - string:
+            name: RPM_OVS211_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/24.el7fdp/x86_64/openvswitch2.11-2.11.0-24.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/4.el7fdp/x86_64/openvswitch2.12-2.12.0-4.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.12 RPM"
+        - string:
+            name: RPM_OVS211_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/24.el8fdp/x86_64/openvswitch2.11-2.11.0-24.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_80
+            default: "http://download.eng.bos.redhat.com/brewroot/vol/rhel-8/packages/ovn2.12/2.12.0/2.el8fdp/x86_64/ovn2.12-2.12.0-2.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.12 RPM"
+        - string:
+            name: RPM_DRIVERCTL
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.108/1.el8/noarch/driverctl-0.108-1.el8.noarch.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7_6/x86_64/dpdk-18.11.2-1.el7_6.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_TOOLS_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7_6/x86_64/dpdk-tools-18.11.2-1.el7_6.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/3.el8/x86_64/dpdk-18.11.2-3.el8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_TOOLS_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/3.el8/x86_64/dpdk-tools-18.11.2-3.el8.x86_64.rpm"
+            description:
+        - string:
+            name: CHOST
+            default: "netqe13.knqe.lab.eng.bos.redhat.com"
+            description: Client Host (DUT1)
+        - string:
+            name: CNIC_PORT0_77
+            default: "p2p1"
+            description: Client nic_port0 Name for RHEL 7.x
+        - string:
+            name: CNIC_PORT0_80
+            default: "enp132s0f0"
+            description: Client nic_port0 Name for RHEL 8.x
+        - string:
+            name: CNIC_PORT1_77
+            default: "p2p2"
+            description: Client nic_port1 Name for RHEL 7.x
+        - string:
+            name: CNIC_PORT1_80
+            default: "enp132s0f1"
+            description: Client nic_port0 Name for RHEL 8.x
+        - string:
+            name: TREX_PATH
+            default: "/root/v2.36/"
+            description: Path to T-Rex software on T-Rex server
+        - string:
+            name: XENA_IP
+            default: "10.19.15.19"
+            description: IP address of Xena
+        - string:
+            name: NETSCOUT_NIC1
+            default: "NETQE13_P2P1"
+            description: Netscout NIC port 1
+        - string:
+            name: NETSCOUT_NIC2
+            default: "NETQE13_P2P2"
+            description: Netscout NIC port 2
+        - string:
+            name: XENA_MODULE1
+            default: "3"
+            description: Server nic_port0
+        - string:
+            name: XENA_MODULE2
+            default: "3"
+            description: Server nic_port0
+        - string:
+            name: RESERVETIME
+            default: "10000"
+            description: RESERVETIME
+        - string:
+            name: KILLTIMEOVERRIDE
+            default: "9000"
+            description: KILLTIMEOVERRIDE
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        - string:
+            name: NOTES
+            default: ""
+            description: Run Notes
+        - string:
+            name: TEST_INFO
+            default: "Auto"
+            description: "Notes to be added to Beaker job whiteboard"
+        - string:
+            name: NOTIFY
+            default: "bfubel@redhat.com"
+            description: "Email to send Beaker Job Notifcations"
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+    triggers:
+        - timed: 'H 17 * * *'
+    builders:
+        - shell: |
+            #!/bin/bash
+            echo '****************************** Submit Beaker jobs ************************'
+            cat $WORKSPACE/job1.properties
+            # Use the OVS RPM in the Build parameters
+            # echo 'BREW_ID='$BREW_ID
+            # echo 'build='$build
+            # rpm_location=`brew buildinfo $BREW_ID | grep $build |grep $ARCH`
+            # echo 'OVS_RPM='$rpm_location
+            # echo "$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            # RPM_OVS="$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            echo 'RPM_OVS='$RPM_OVS
+
+            rm -f $WORKSPACE/job1.properties
+            rm -f $WORKSPACE/job1html.txt
+            ##########################################################################
+            #                              Get Latest OVS                            #
+            ##########################################################################
+            build=`brew latest-pkg fast-datapath-rhel-7 openvswitch |grep openvswitch |awk '{{print $1}}'`
+            rpm_location=`brew buildinfo $build | grep /$build |grep x86_64`
+            RPM_OVS290_77="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+            echo RPM_OVS290_77=$RPM_OVS290_77
+
+            build=`brew latest-pkg fast-datapath-rhel-7 openvswitch2.11 |grep openvswitch |awk '{{print $1}}'`
+            rpm_location=`brew buildinfo $build | grep /$build |grep x86_64`
+            RPM_OVS211_77="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+            echo RPM_OVS211_77=$RPM_OVS211_77
+
+            build=`brew latest-pkg fast-datapath-rhel-7 openvswitch2.21 |grep openvswitch |awk '{{print $1}}'`
+            rpm_location=`brew buildinfo $build | grep /$build |grep x86_64`
+            RPM_OVS212_77="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+            echo RPM_OVS212_77=$RPM_OVS212_77
+
+            build=`brew latest-pkg fast-datapath-rhel-8 openvswitch2.11 |grep openvswitch |awk '{{print $1}}'`
+            rpm_location=`brew buildinfo $build | grep /$build |grep x86_64`
+            RPM_OVS211_80="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+            echo RPM_OVS211_80=$RPM_OVS211_80
+
+            build=`brew latest-pkg fast-datapath-rhel-8 openvswitch2.12 |grep openvswitch |awk '{{print $1}}'`
+            rpm_location=`brew buildinfo $build | grep /$build |grep x86_64`
+            RPM_OVS212_80="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+            echo RPM_OVS212_80=$RPM_OVS212_80
+
+
+            ##########################################################################
+            #Test 1: VSPERF_CI Nightly [ixgbe] [OVS_2.90 [7.7] [Xena Module 2] [$CHOST]
+            ##########################################################################
+            echo "##################################################################"
+            echo "#Test 1: VSPERF_CI Nightly ixgbe RHEL-7.7  OVS 2.90              #"
+            echo "#        Machine netqe22                                         #"
+            echo "#        XENA_M7P0,XENA_M7P0                                     #"
+            echo "#        Results need traffic search beeker output for           #"
+            echo "# Search the key word 'Test case google sheet link is as follow' #"
+            echo "#                                                                #"
+            echo "##################################################################"
+            rm -f $WORKSPACE/job1html.txt
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job1.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <notify>
+                <cc>$NOTIFY</cc>
+              </notify>
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.90] [vsperf_CI-nightly]  [ixgbe] [$CHOST] </whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_77] [OVS 2.90] [vsperf_CI-nightly]  [ixgbe] [$CHOST]" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        <system_type value="Machine"/></hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="1,3,5,7,9,11,13,15"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="10.19.15.19"/>
+                      <param name="XENA_MODULE1" value="$XENA_MODULE1"/>
+                      <param name="XENA_MODULE2" value="$XENA_MODULE2"/>
+                      <param name="RUN_JOB" value="nightly"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="OVS_URL" value="$RPM_OVS290_77"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="NETQE13_P2P1"/>
+                      <param name="NetScout_nic2" value="NETQE13_P2P2"/>
+                      <param name="NIC1" value="$CNIC_PORT0_77"/>
+                      <param name="NIC2" value="$CNIC_PORT1_77"/>
+                      <param name="image_method" value="download"/>
+                      <param name="verification" value="no"/>
+                      <param name="PYTHON_ENV" value="34"/>
+                      <param name="COMMIT" value="yes"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="guest_dpdk_version" value="1811-4"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="#RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job1.xml
+            bkr job-submit $WORKSPACE/job1.xml |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 2: VSPERF_CI Nightly [ixgbe] [OVS_2.11 [7.7] [Xena Module 3] [$CHOST]
+            ##########################
+            echo "##################################################################"
+            echo "#Test 2: VSPERF_CI Nightly ixgbe RHEL-7.7  OVS 2.11              #"
+            echo "#        Machine netqe22                                         #"
+            echo "#        XENA_M3P0,XENA_M3P0                                     #"
+            echo "#        Results need traffic search beeker output for           #"
+            echo "# Search the key word 'Test case google sheet link is as follow' #"
+            echo "#                                                                #"
+            echo "##################################################################"
+            rm -f $WORKSPACE/job2html.txt
+            touch $WORKSPACE/job2.xml
+            cat <<EOT > $WORKSPACE/job2.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <notify>
+                <cc>$NOTIFY</cc>
+              </notify>
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.11] [vsperf_CI-nightly]  [ixgbe] [$CHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_77] [OVS 2.11] [vsperf_CI-nightly]  [ixgbe] [$CHOST]" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        <system_type value="Machine"/></hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="1,3,5,7,9,11,13,15"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="10.19.15.19"/>
+                      <param name="XENA_MODULE1" value="$XENA_MODULE1"/>
+                      <param name="XENA_MODULE2" value="$XENA_MODULE2"/>
+                      <param name="RUN_JOB" value="nightly"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="OVS_URL" value="$RPM_OVS211_77"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="NETQE13_P2P1"/>
+                      <param name="NetScout_nic2" value="NETQE13_P2P2"/>
+                      <param name="NIC1" value="$CNIC_PORT0_77"/>
+                      <param name="NIC2" value="$CNIC_PORT1_77"/>
+                      <param name="image_method" value="download"/>
+                      <param name="verification" value="no"/>
+                      <param name="PYTHON_ENV" value="34"/>
+                      <param name="COMMIT" value="yes"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="guest_dpdk_version" value="1811-4"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job2.xml
+            bkr job-submit $WORKSPACE/job2.xml |tee $WORKSPACE/bkr_job2.txt
+            grep Submitted $WORKSPACE/bkr_job2.txt >$WORKSPACE/bkr_jobnum2.txt
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job2.properties
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job2html.txt
+            BKR_JOBID2html=`cut -d\: -f2 $WORKSPACE/job2html.txt`
+            echo 'BKR_JOBID2html='$BKR_JOBID2html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 3: VSPERF_CI Nighly [ixgbe] [8.0] [Xena Module 2] [$CHOST]
+            ##########################
+            echo "##################################################################"
+            echo "#Test 3: VSPERF_CI Nightly ixgbe RHEL-8.0  OVS 2.11              #"
+            echo "#        Machine netqe22                                         #"
+            echo "#        XENA_M7P0,XENA_M7P0                                     #"
+            echo "#        Results need traffic search beeker output for           #"
+            echo "# Search the key word 'Test case google sheet link is as follow' #"
+            echo "#                                                                #"
+            echo "##################################################################"
+            rm -f $WORKSPACE/job3html.txt
+            touch $WORKSPACE/job3.xml
+            cat <<EOT > $WORKSPACE/job3.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_80] [OVS 2.11] [vsperf_CI-nightly]  [ixgbe] [$CHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_80] [OVS 2.11] [vsperf_CI-nightly]  [ixgbe] [$CHOST]" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post
+            cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+            [beaker-postrepo0]
+            name=beaker-postrepo0
+            baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+            enabled=1
+            gpgcheck=0
+            skip_if_unavailable=1
+            EOF
+            %end
+            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$COMPOSE_80"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$CHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions/>
+                  <task name="/distribution/install" role="STANDALONE"/>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="1,3,5,7,9,11,13,15"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="10.19.15.19"/>
+                      <param name="XENA_MODULE1" value="$XENA_MODULE1"/>
+                      <param name="XENA_MODULE2" value="$XENA_MODULE2"/>
+                      <param name="RUN_JOB" value="nightly"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="DPDK_GUEST_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_GUEST_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="OVS_URL" value="$RPM_OVS211_80"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="NETQE13_P2P1"/>
+                      <param name="NetScout_nic2" value="NETQE13_P2P2"/>
+                      <param name="NIC1" value="$CNIC_PORT0_80"/>
+                      <param name="NIC2" value="$CNIC_PORT0_81"/>
+                      <param name="image_method" value="download"/>
+                      <param name="verification" value="no"/>
+                      <param name="PYTHON_ENV" value="36"/>
+                      <param name="COMMIT" value="yes"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="nightly_viommu" value="enable"/>
+                      <param name="guest_dpdk_version" value="1811-2"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job3.xml
+            bkr job-submit $WORKSPACE/job3.xml |tee $WORKSPACE/bkr_job3.txt
+            grep Submitted $WORKSPACE/bkr_job3.txt >$WORKSPACE/bkr_jobnum3.txt
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job3html.txt
+            BKR_JOBID3html=`cut -d\: -f2 $WORKSPACE/job3html.txt`
+            echo 'BKR_JOBID3html='$BKR_JOBID3html >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 4: VSPERF_CI Nightly [ixgbe] [OVS_2.12] [7.7] [Xena Module 2] [$CHOST]
+            ##########################
+            echo "##################################################################"
+            echo "#Test 4: VSPERF_CI Nightly ixgbe RHEL-7.7  OVS 2.12             #"
+            echo "#        Machine netqe22                                         #"
+            echo "#        XENA_M7P0,XENA_M7P0                                     #"
+            echo "#        Results need traffic search beeker output for           #"
+            echo "# Search the key word 'Test case google sheet link is as follow' #"
+            echo "#                                                                #"
+            echo "##################################################################"
+            rm -f $WORKSPACE/job4html.txt
+            touch $WORKSPACE/job4.xml
+            cat <<EOT > $WORKSPACE/job4.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <notify>
+                <cc>$NOTIFY</cc>
+              </notify>
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.12] [vsperf_CI-nightly]  [ixgbe] [$CHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_77] [OVS 2.12] [vsperf_CI-nightly]  [ixgbe] [$CHOST]" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        <system_type value="Machine"/></hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="1,3,5,7,9,11,13,15"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="10.19.15.19"/>
+                      <param name="XENA_MODULE1" value="$XENA_MODULE1"/>
+                      <param name="XENA_MODULE2" value="$XENA_MODULE2"/>
+                      <param name="RUN_JOB" value="nightly"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="OVS_URL" value="$RPM_OVS212_77"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="NETQE13_P2P1"/>
+                      <param name="NetScout_nic2" value="NETQE13_P2P2"/>
+                      <param name="NIC1" value="$CNIC_PORT0_77"/>
+                      <param name="NIC2" value="$CNIC_PORT1_77"/>
+                      <param name="image_method" value="download"/>
+                      <param name="verification" value="no"/>
+                      <param name="PYTHON_ENV" value="34"/>
+                      <param name="COMMIT" value="yes"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="guest_dpdk_version" value="1811-4"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job4.xml
+            bkr job-submit $WORKSPACE/job4.xml |tee $WORKSPACE/bkr_job4.txt
+            grep Submitted $WORKSPACE/bkr_job4.txt >$WORKSPACE/bkr_jobnum4.txt
+            BKR_JOBID4=`cut -d\' -f2 $WORKSPACE/bkr_jobnum4.txt`
+            echo BKR_JOBID4=$BKR_JOBID4 >> $WORKSPACE/job4.properties
+            echo BKR_JOBID4=$BKR_JOBID4 >> $WORKSPACE/job4html.txt
+            BKR_JOBID4html=`cut -d\: -f2 $WORKSPACE/job4html.txt`
+            echo 'BKR_JOBID4html='$BKR_JOBID4html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 5: VSPERF_CI Nighly [ixgbe] [8.0] [OVS 2.12] [Xena Module 2] [$CHOST]
+            ##########################
+            echo "##################################################################"
+            echo "#Test 5: VSPERF_CI Nightly ixgbe RHEL-8.0  OVS 2.12              #"
+            echo "#        Machine netqe22                                         #"
+            echo "#        XENA_M7P0,XENA_M7P0                                     #"
+            echo "#        Results need traffic search beeker output for           #"
+            echo "# Search the key word 'Test case google sheet link is as follow' #"
+            echo "#                                                                #"
+            echo "##################################################################"
+            rm -f $WORKSPACE/job5html.txt
+            touch $WORKSPACE/job5.xml
+            cat <<EOT > $WORKSPACE/job5.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_80] [OVS 2.12] [vsperf_CI-nightly]  [ixgbe] [$CHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_80] [OVS 2.12] [vsperf_CI-nightly]  [ixgbe] [$CHOST]" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post
+            cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+            [beaker-postrepo0]
+            name=beaker-postrepo0
+            baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+            enabled=1
+            gpgcheck=0
+            skip_if_unavailable=1
+            EOF
+            %end
+            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$COMPOSE_80"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$CHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions/>
+                  <task name="/distribution/install" role="STANDALONE"/>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="1,3,5,7,9,11,13,15"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="10.19.15.19"/>
+                      <param name="XENA_MODULE1" value="$XENA_MODULE1"/>
+                      <param name="XENA_MODULE2" value="$XENA_MODULE2"/>
+                      <param name="RUN_JOB" value="nightly"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="DPDK_GUEST_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_GUEST_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="OVS_URL" value="$RPM_OVS212_80"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="NETQE22_P6P1"/>
+                      <param name="NetScout_nic2" value="NETQE22_P6P2"/>
+                      <param name="NIC1" value="$CNIC_PORT0_80"/>
+                      <param name="NIC2" value="$CNIC_PORT0_81"/>
+                      <param name="image_method" value="download"/>
+                      <param name="verification" value="no"/>
+                      <param name="PYTHON_ENV" value="36"/>
+                      <param name="COMMIT" value="yes"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="nightly_viommu" value="enable"/>
+                      <param name="guest_dpdk_version" value="1811-2"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job5.xml
+            bkr job-submit $WORKSPACE/job5.xml |tee $WORKSPACE/bkr_job5.txt
+            grep Submitted $WORKSPACE/bkr_job5.txt >$WORKSPACE/bkr_jobnum5.txt
+            BKR_JOBID5=`cut -d\' -f2 $WORKSPACE/bkr_jobnum5.txt`
+            echo BKR_JOBID5=$BKR_JOBID5 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID5=$BKR_JOBID5 >> $WORKSPACE/job5html.txt
+            BKR_JOBID5html=`cut -d\: -f2 $WORKSPACE/job5html.txt`
+            echo 'BKR_JOBID5html='$BKR_JOBID5html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo $BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $morBKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+            BKR_JOB1_LOG_HTML=$(bkr job-results --format junit-xml $jobid | grep '"/kernel/networking/vsperf/vsperf_CI" name="(main)"' -C 5 |grep taskout)
+            wget $BKR_JOB1_LOG_HTML
+            BKR_JOB1_GOOGLE_SHEET=$(grep 'google sheet'  TESTOUT.log -C 1 |grep https)
+            echo "BKR_JOB1_GOOGLE_SHEET=$BKR_JOB1_GOOGLE_SHEET" >> $WORKSPACE/job1.properties
+            rm -f TESTOUT.log
+
+
+            #####################################################################
+            # Get Beaker Job 2 job-results
+            #####################################################################
+            BKR_TESTS_JOB2_EXEC=0
+            BKR_TESTS_JOB2_FAILED=0
+            for jobid in $BKR_JOBID2; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid2.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid2.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB2_EXEC=$((BKR_TESTS_JOB2_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB2_FAILED=$((BKR_TESTS_JOB2_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB2_EXEC=$BKR_TESTS_JOB2_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB2_FAILED=$BKR_TESTS_JOB2_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB2=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB2_EXEC"'", "failed": "'"$BKR_TESTS_JOB2_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB2
+            echo "BKR_TESTS_JOB2=$BKR_TESTS_JOB2" >> $WORKSPACE/job1.properties
+
+            BKR_JOB2_LOG_HTML=$(bkr job-results --format junit-xml $jobid | grep '"/kernel/networking/vsperf/vsperf_CI" name="(main)"' -C 5 |grep taskout)
+            wget $BKR_JOB2_LOG_HTML
+            BKR_JOB2_GOOGLE_SHEET=$(grep 'google sheet'  TESTOUT.log -C 1 |grep https)
+            echo "BKR_JOB2_GOOGLE_SHEET=$BKR_JOB2_GOOGLE_SHEET" >> $WORKSPACE/job1.properties
+            rm -f TESTOUT.log
+
+            #####################################################################
+            # Get Beaker Job 3 job-results
+            #####################################################################
+            BKR_TESTS_JOB3_EXEC=0
+            BKR_TESTS_JOB3_FAILED=0
+            for jobid in $BKR_JOBID3; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid3.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid3.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB3_EXEC=$((BKR_TESTS_JOB3_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB3_FAILED=$((BKR_TESTS_JOB3_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB3_EXEC=$BKR_TESTS_JOB3_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB3_FAILED=$BKR_TESTS_JOB3_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB3=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB3_EXEC"'", "failed": "'"$BKR_TESTS_JOB3_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB3
+            echo "BKR_TESTS_JOB3=$BKR_TESTS_JOB3" >> $WORKSPACE/job1.properties
+
+            BKR_JOB3_LOG_HTML=$(bkr job-results --format junit-xml $jobid | grep '"/kernel/networking/vsperf/vsperf_CI" name="(main)"' -C 5 |grep taskout)
+            wget $BKR_JOB3_LOG_HTML
+            BKR_JOB3_GOOGLE_SHEET=$(grep 'google sheet'  TESTOUT.log -C 1 |grep https)
+            echo "BKR_JOB3_GOOGLE_SHEET=$BKR_JOB3_GOOGLE_SHEET" >> $WORKSPACE/job1.properties
+            rm -f TESTOUT.log
+
+            #####################################################################
+            # Get Beaker Job 4 job-results
+            #####################################################################
+            BKR_TESTS_JOB4_EXEC=0
+            BKR_TESTS_JOB4_FAILED=0
+            for jobid in $BKR_JOBID4; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid4.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid4.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB4_EXEC=$((BKR_TESTS_JOB4_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB4_FAILED=$((BKR_TESTS_JOB4_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB4_EXEC=$BKR_TESTS_JOB4_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB4_FAILED=$BKR_TESTS_JOB4_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB4=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB4_EXEC"'", "failed": "'"$BKR_TESTS_JOB4_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB4
+            echo "BKR_TESTS_JOB4=$BKR_TESTS_JOB4" >> $WORKSPACE/job1.properties
+
+            BKR_JOB4_LOG_HTML=$(bkr job-results --format junit-xml $jobid | grep '"/kernel/networking/vsperf/vsperf_CI" name="(main)"' -C 5 |grep taskout)
+            wget $BKR_JOB4_LOG_HTML
+            BKR_JOB4_GOOGLE_SHEET=$(grep 'google sheet'  TESTOUT.log -C 1 |grep https)
+            echo "BKR_JOB4_GOOGLE_SHEET=$BKR_JOB4_GOOGLE_SHEET" >> $WORKSPACE/job1.properties
+            rm -f TESTOUT.log
+
+            #####################################################################
+            # Get Beaker Job 5 job-results
+            #####################################################################
+            BKR_TESTS_JOB5_EXEC=0
+            BKR_TESTS_JOB5_FAILED=0
+            for jobid in $BKR_JOBID5; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid5.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid5.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB5_EXEC=$((BKR_TESTS_JOB5_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB5_FAILED=$((BKR_TESTS_JOB5_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB5_EXEC=$BKR_TESTS_JOB5_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB5_FAILED=$BKR_TESTS_JOB5_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB5=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB5_EXEC"'", "failed": "'"$BKR_TESTS_JOB5_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB5
+            echo "BKR_TESTS_JOB5=$BKR_TESTS_JOB5" >> $WORKSPACE/job1.properties
+
+            BKR_JOB5_LOG_HTML=$(bkr job-results --format junit-xml $jobid | grep '"/kernel/networking/vsperf/vsperf_CI" name="(main)"' -C 5 |grep taskout)
+            wget $BKR_JOB5_LOG_HTML
+            BKR_JOB5_GOOGLE_SHEET=$(grep 'google sheet'  TESTOUT.log -C 1 |grep https)
+            echo "BKR_JOB5_GOOGLE_SHEET=$BKR_JOB5_GOOGLE_SHEET" >> $WORKSPACE/job1.properties
+            rm -f TESTOUT.log
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+
+    publishers:
+        - email-ext:
+            recipients: bfubel@redhat.com,ctrautma@redhat.com
+            subject: Jenkins VSPERF_CI Nightly Automation run on $CHOST
+            body: |
+              Beaker Job "nightly/ovs_vsperf_nightly_ci/VSPERF_CI Nightly IXGBE RHEL-77 OVS2.90" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+                          Google Sheet ${{ENV,var="BKR_JOB1_GOOGLE_SHEET"}}
+              Beaker Job "nightly/ovs_vsperf_nightly_ci/VSPERF_CI Nightly IXGBE RHEL-77 OVS2.11" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID2html"}} Executed=${{ENV,var="BKR_TESTS_JOB2_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB2_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB2"}}
+                          Google Sheet ${{ENV,var="BKR_JOB2_GOOGLE_SHEET"}}
+              Beaker Job "nightly/ovs_vsperf_nightly_ci/VSPERF_CI Nightly IXGBE RHEL-80 OVS2.11" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID3html"}} Executed=${{ENV,var="BKR_TESTS_JOB3_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+                          Google Sheet ${{ENV,var="BKR_JOB3_GOOGLE_SHEET"}}
+              Beaker Job "nightly/ovs_vsperf_nightly_ci/VSPERF_CI Nightly IXGBE RHEL-77 OVS2.12" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID4html"}} Executed=${{ENV,var="BKR_TESTS_JOB4_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB4_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB4"}}
+                          Google Sheet ${{ENV,var="BKR_JOB4_GOOGLE_SHEET"}}
+              Beaker Job "nightly/ovs_vsperf_nightly_ci/VSPERF_CI Nightly IXGBE RHEL-80 OVS2.12" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID5html"}} Executed=${{ENV,var="BKR_TESTS_JOB5_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB5_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB5"}}
+                          Google Sheet ${{ENV,var="BKR_JOB5_GOOGLE_SHEET"}}
+              Notes:${{ENV,var="NOTES"}}
+              RHEL7.x OVS_2.90 RPM=${{ENV,var="RPM_OVS290_77"}}
+              RHEL7.x OVS_2.11 RPM=${{ENV,var="RPM_OVS211_77"}}
+              RHEL7.x OVS_2.12 RPM=${{ENV,var="RPM_OVS212_77"}}
+              RHEL8.x OVS_2.11 RPM=${{ENV,var="RPM_OVS211_80"}}
+              RHEL8.x OVS_2.12 RPM=${{ENV,var="RPM_OVS212_80"}}
+              RHEL7.x Compose=${{ENV,var="COMPOSE_77"}}
+              RHEL8.x Compose=${{ENV,var="COMPOSE_80"}}
+              Jenkins Job URL https://platform-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/job/nightly/job/ovs_vsperf_nightly_ci/job/kernel-qe-ovs-vsperf-nightly-ixgbe-ci/
+
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+        # - workspace-cleanup:
+        # #   include:
+        # #       - "*"
+        # #   exclude:
+        # #       #need resources file to trigger teardown job
+        # #       - "job1.properties.txt"
+        # #   dirmatch: true
+        #     clean-if:
+        #         - success: true
+        #         - not-built: true
+
+
+- project:
+    name: kernel-qe
+    jobs:
+      - 'nightly/ovs_vsperf_nightly_ci/kernel-qe-ovs-vsperf-nightly-ixgbe-ci'
+###########################################################
+#                        History                          #
+###########################################################
+# Date            Modifier    Details
+# 22-sep-2019     bfubel    Created off ovs-dodk-tunneling-ci
+#                          
+#                          

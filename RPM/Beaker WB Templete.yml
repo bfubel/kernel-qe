@@ -1,0 +1,9 @@
+White Board Standard
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.90] [vsperf_nightly]  [ixgbe] [$CHOST] </whiteboard>
+
+              $TEST_INFO
+                Auto
+                19.F
+                19.G
+                OVS2.12
+                Manual
