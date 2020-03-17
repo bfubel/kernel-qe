@@ -15,7 +15,7 @@
             description: Run Notes
         - string:
             name: RPM_OVS
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/48.el8fdp/x86_64/openvswitch2.11-2.11.0-48.el8fdp.x86_64.rpm"
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el8fdp/x86_64/openvswitch2.11-2.11.0-50.el8fdp.x86_64.rpm"
             description: RPM_OVS brew location of OVS RPM
         - string:
             name: RPM_CONTAINER_SELINUX_POLICY
