@@ -49,13 +49,18 @@
                     - OVS-2.13
               visible-items: 4
               default-value: OVS-2.90,OVS-2.11
+        #######################################  RPM Info ###################################
+        - string:
+            name: TEST_INFO
+            default: "20.C"
+            description: "Notes to be added to Beaker job whiteboard"
         - string:
             name: COMPOSE_77
             default: "RHEL-7.7-20190716.0"
             description: "RHEL-7.7 compose"
         - string:
             name: COMPOSE_78
-            default: "RHEL-7.8-20200203.n.0"
+            default: "RHEL-7.8-20200225.1"
             description: "RHEL-7.8 compose"
         - string:
             name: COMPOSE_79
@@ -79,39 +84,63 @@
             description: "RHEL-8.2 Compose"
         - string:
             name: RPM_OVS290_7x
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/125.el7fdp/x86_64/openvswitch-2.9.0-125.el7fdp.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/127.el7fdp/x86_64/openvswitch-2.9.0-127.el7fdp.x86_64.rpm"
             description: "RHEL-7.7 OVS 2.90 RPM"
         - string:
             name: RPM_OVS211_7x
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/48.el7fdp/x86_64/openvswitch2.11-2.11.0-48.el7fdp.x86_64.rpm"
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el7fdp/x86_64/openvswitch2.11-2.11.0-50.el7fdp.x86_64.rpm"
             description: "RHEL-7.7 OVS 2.11 RPM"
         - string:
             name: RPM_OVS212_7x
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/22.el7fdp/x86_64/openvswitch2.12-2.12.0-22.el7fdp.x86_64.rpm"
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/23.el7fdp/x86_64/openvswitch2.12-2.12.0-23.el7fdp.x86_64.rpm"
             description: "RHEL-7.7 OVS 2.12 RPM"
         - string:
+            name: RPM_OVS213_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/1.el7fdp/x86_64/openvswitch2.13-2.13.0-1.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.13 RPM"
+        - string:
             name: RPM_OVS211_8x
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/48.el8fdp/x86_64/openvswitch2.11-2.11.0-48.el8fdp.x86_64.rpm"
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el8fdp/x86_64/openvswitch2.11-2.11.0-50.el8fdp.x86_64.rpm"
             description: "RHEL-8.0 OVS 2.11 RPM"
         - string:
             name: RPM_OVS212_8x
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/22.el8fdp/x86_64/openvswitch2.12-2.12.0-22.el8fdp.x86_64.rpm"
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/23.el8fdp/x86_64/openvswitch2.12-2.12.0-23.el8fdp.x86_64.rpm"
             description: "RHEL-8.0 OVS 2.12 RPM"
         - string:
             name: RPM_OVS213_8x
-            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/0.20200117git8ae6a5f.el8fdp/x86_64/openvswitch2.13-2.13.0-0.20200117git8ae6a5f.el8fdp.x86_64.rpm"
-            description: "RHEL-8.x OVS 2.13 RPM"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/6.el8fdp/x86_64/openvswitch2.13-2.13.0-6.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.13 RPM"
+        - string:
+            name: RPM_OVN211_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el7fdp/x86_64/ovn2.12-2.12.0-36.el7fdp.x86_64.rpm"
+            description: "RHEL-7.X OVN 2.11 RPM"
+        - string:
+            name: RPM_OVN212_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el7fdp/x86_64/ovn2.12-2.12.0-36.el7fdp.x86_64.rpm"
+            description: "RHEL-7.X OVN 2.12 RPM"
+        - string:
+            name: RPM_OVN211_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.11/2.11.1/37.el7fdp/x86_64/ovn2.11-2.11.1-37.el7fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.11 RPM"
+        - string:
+            name: RPM_OVN212_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el8fdp/x86_64/ovn2.12-2.12.0-36.el8fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.12 RPM"
+        - string:
+            name: RPM_OVN213_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/6.el8fdp/x86_64/openvswitch2.13-2.13.0-6.el8fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.12 RPM"
         - string:
             name: RPM_DRIVERCTL
             default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.108/1.el8/noarch/driverctl-0.108-1.el8.noarch.rpm"
             description:
         - string:
             name: RPM_DPDK_7x
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7/x86_64/dpdk-18.11.2-1.el7.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.5/1.el7_8/x86_64/dpdk-18.11.5-1.el7_8.x86_64.rpm"
             description:
         - string:
             name: RPM_DPDK_TOOLS_7x
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7/x86_64/dpdk-tools-18.11.2-1.el7.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.5/1.el7_8/x86_64/dpdk-tools-18.11.5-1.el7_8.x86_64.rpm"
             description:
         - string:
             name: RPM_DPDK_8x
@@ -123,15 +152,15 @@
             description:
         - string:
             name: RPM_DPDK_8x_213
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/1.el8/x86_64/dpdk-19.11-1.el8.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/4.el8/x86_64/dpdk-19.11-4.el8.x86_64.rpm"
             description:
         - string:
             name: RPM_DPDK_TOOLS_8x_213
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/1.el8/x86_64/dpdk-tools-19.11-1.el8.x86_64.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/4.el8/x86_64/dpdk-tools-19.11-4.el8.x86_64.rpm"
             description:
         - string:
             name: DPDK_VER_7x
-            default: "18.11.2"
+            default: "18.11.5"
             description: "Version of Rhel 7.x DPDK used"
         - string:
             name: DPDK_VER_8x_213
@@ -139,88 +168,107 @@
             description: "Version of Rhel 8.x DPDK used for OVS 2.13"
         - string:
             name: RPM_OVS_SELINUX_EXTRA_77
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/14.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-14.el7fdp.noarch.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/15.el7fdp/src/openvswitch-selinux-extra-policy-1.0-15.el7fdp.src.rpm"
             description: "RHEL-7.7 openvswitch-selinux-extra-policy rpm location"
         - string:
             name: RPM_OVS_SELINUX_EXTRA_80
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/19.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-19.el8fdp.noarch.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/22.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-22.el8fdp.noarch.rpm"
             description: "RHEL-8.0 openvswitch-selinux-extra-policy rpm location"
-        - string:
-            name: TEST_INFO
-            default: "20.B"
-            description: "Notes to be added to Beaker job whiteboard"
+        #######################################  Client Info ###################################
         - string:
             name: CHOST
-            default: "netqe23.knqe.lab.eng.bos.redhat.com"
+            default: "netqe11.knqe.lab.eng.bos.redhat.com"
             description: client Host
         - string:
             name: CNIC_TYPE
-            default: "nfp"
-            description: Interface Type
-        - string:
-            name: CNIC_PORT0_7x
-            default: "enp131s0np0"
-            description: Client 7.x nic_port0
-        - string:
-            name: CNIC_PORT1_7x
-            default: "enp131s0np1"
-            description: Client 7.x nic_port1
-        - string:
-            name: CNIC_PORT0_8x
-            default: "enp134s0f0"
-            description: Client 8.X nic_port0
-        - string:
-            name: CNIC_PORT1_8x
-            default: "enp134s0f1"
-            description: Client 8.X nic_port1
-        - string:
-            name: CNETSCOUT_PORT0
-            default: "NETQE23_ENP131S0NP0"
-            description: Client nic_port0
-        - string:
-            name: CNETSCOUT_PORT1
-            default: "NETQE23_ENP131S0NP1"
-            description: Client nic_port0
-        - string:
-            name: SHOST
-            default: "netqe11.knqe.lab.eng.bos.redhat.com"
-            description: Server Host
-        - string:
-            name: SNIC_TYPE
             default: "mlx4_en"
             description: Interface Type
         - string:
-            name: SNIC_PORT0_7x
+            name: CNIC_PORT0_7x
             default: "p7p1"
-            description: Server 7.x nic_port0
+            description: Client 7.x nic_port0
         - string:
-            name: SNIC_PORT1_7x
+            name: CNIC_PORT1_7x
             default: "p7p2"
-            description: Server 7.x nic_port1
+            description: Client 7.x nic_port1
         - string:
             name: CNIC_PORT0_8x
             default: "enp4s0d0"
-            description: Client 8.x nic_port0
+            description: Client 8.X nic_port0
         - string:
             name: CNIC_PORT1_8x
             default: "enp4s0d1"
+            description: Client 8.X nic_port1
+        - string:
+            name: CNETSCOUT_PORT0
+            default: "NETQE11_P7P1"
+            description: Client nic_port0
+        - string:
+            name: CNETSCOUT_PORT1
+            default: "NETQE11_P7P2"
+            description: Client nic_port0
+        #######################################  Server Info ###################################
+        - string:
+            name: SHOST
+            default: "netqe23.knqe.lab.eng.bos.redhat.com"
+            description: Server Host
+        - string:
+            name: SNIC_TYPE
+            default: "i40e"
+            description: Interface Type
+        - string:
+            name: SNIC_PORT0_7x
+            default: "p1p1"
+            description: Server 7.x nic_port0
+        - string:
+            name: SNIC_PORT1_7x
+            default: "p1p2"
+            description: Server 7.x nic_port1
+        - string:
+            name: SNIC_PORT0_MAC
+            default: "3c:fd:fe:a0:38:d0"
+            description: Client 8.x nic_port0
+        - string:
+            name: SNIC_PORT0_8x
+            default: "enp129s0f0"
+            description: Client 8.x nic_port0
+        - string:
+            name: SNIC_PORT1_8x
+            default: "enp129s0f1"
             description: Client 8.x nic_port1
         - string:
             name: SNETSCOUT_PORT0
-            default: "NETQE11_P7P1"
+            default: "NETQE23_P1P1"
             description: Server nic_port0
         - string:
             name: SNETSCOUT_PORT1
-            default: "NETQE11_P7P2"
+            default: "NETQE23_P1P2"
             description: Server nic_port0
+        #######################################  Traffic Generator Info ###################################
         - string:
             name: NETSCOUT
             default: "bos_100G.cfg"
             description: 'bos_100G.cfg,bos_10G.cfg,bej_100G.cfg,bej_10G.cfg'
         - string:
+            name: NETSCOUT_SPEED
+            default: "100"
+            description: 'Netscout Port Speed'
+        - string:
+            name: QCOW_LOC
+            default: "Westford"
+            description: 'Westford,'
+        - string:
             name: ARCH
             default: x86_64
             description: ARCH
+        - string:
+            name: RESERVETIME
+            default: "4000"
+            description: RESERVETIME
+        - string:
+            name: KILLTIMEOVERRIDE
+            default: "3900"
+            description: KILLTIMEOVERRIDE
         - string:
             name: NOTES
             default: ""
@@ -463,7 +511,7 @@
               </notify>
               <whiteboard>[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$CHOST] [$SHOST] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4] </whiteboard>
               <recipeSet priority="Urgent">
-                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$SHOST] [SERVERS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4]" role=SERVERS "None" ks_meta="" kernel_options="" kernel_options_post="">
                   <autopick random="false"/>
                   <watchdog panic="None"/>
                   <packages/>
@@ -479,7 +527,7 @@
                         </distroRequires>
                   <hostRequires>
                             <and>
-                                <hostname op="=" value="$CHOST"/>
+                                <hostname op="=" value="$SHOST"/>
                                 <system_type op="=" value="machine"/>
                             </and>
                             <or>
@@ -497,22 +545,33 @@
                   <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="SERVERS">
                     <params>
                       <param name="NAY" value="yes"/>
-                      <param name="nic_port0" value="$CNIC_PORT0_7x"/>
-                      <param name="nic_port1" value="$CNIC_PORT1_7x"/>
+                      <param name="nic_port0" value="$SNIC_PORT0_7x"/>
+                      <param name="nic_port1" value="$SNIC_PORT1_7x"/>
                       <param name="tunnel_flag" value="gre"/>
                       <param name="ip_flag" value="ipv4"/>
                       <param name="NUMA_NODE" value="1"/>
-                      <param name="driver_name" value="$CNIC_TYPE"/>
+                      <param name="driver_name" value="$SNIC_TYPE"/>
                       <param name="nic1_mac" value="3c:fd:fe:a0:38:d0"/>
                       <param name="dpdk_rpm" value="$test_dpdk"/>
                       <param name="dpdk_tools_rpm" value="$test_dpdk_tools"/>
-                      <param name="guest_openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                      <param name="NetScout_client_nic1" value="$CNETSCOUT_PORT0"/>
+                      <param name="NetScout_client_nic2" value="$CNETSCOUT_PORT1"/>
+                      <param name="NetScout_server_nic1" value="$SNETSCOUT_PORT0"/>
+                      <param name="NetScout_server_nic2" value="$SNETSCOUT_PORT1"/>
+                      <param name="NetScout_speed" value="100"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="SERVERS">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$RESERVETIME"/>
                     </params>
                   </task>
                 </recipe>
-                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$CHOST] [CLIENTS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4]" role="CLIENTS" ks_meta="" kernel_options="" kernel_options_post="">
                   <autopick random="false"/>
                   <watchdog panic="None"/>
                   <packages/>
@@ -528,7 +587,7 @@
                         </distroRequires>
                   <hostRequires>
                             <and>
-                                <hostname op="=" value="$SHOST"/>
+                                <hostname op="=" value="$CHOST"/>
                                 <system_type op="=" value="machine"/>
                             </and>
                             <or>
@@ -546,18 +605,30 @@
                   <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="CLIENTS">
                     <params>
                       <param name="NAY" value="yes"/>
-                      <param name="nic_port0" value="$SNIC_PORT0_7x"/>
-                      <param name="nic_port1" value="$SNIC_PORT1_7x"/>
+                      <param name="nic_port0" value="$CNIC_PORT0_7x"/>
+                      <param name="nic_port1" value="$CNIC_PORT1_7x"/>
                       <param name="tunnel_flag" value="gre"/>
                       <param name="ip_flag" value="ipv4"/>
                       <param name="NUMA_NODE" value="1"/>
-                      <param name="driver_name" value="$SNIC_TYPE"/>
+                      <param name="driver_name" value="$CNIC_TYPE"/>
                       <param name="nic1_mac" value="e4:1d:2d:1e:d2:e0"/>
                       <param name="dpdk_rpm" value="$test_dpdk"/>
                       <param name="dpdk_tools_rpm" value="$test_dpdk_tools"/>
-                      <param name="guest_openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                      <param name="NetScout_client_nic1" value="$CNETSCOUT_PORT0"/>
+                      <param name="NetScout_client_nic2" value="$CNETSCOUT_PORT1"/>
+                      <param name="NetScout_server_nic1" value="$SNETSCOUT_PORT0"/>
+                      <param name="NetScout_server_nic2" value="$SNETSCOUT_PORT1"/>
+                      <param name="NetScout_speed" value="100"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="SERVERS">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$RESERVETIME"/>
                     </params>
                   </task>
                 </recipe>
@@ -627,71 +698,9 @@
               <notify>
                 <cc>$NOTIFY</cc>
               </notify>
-              <whiteboard>[$TEST_INFO] [$test_compose] [Performace] [$test_ovs_rpm] [ovs-dpdk-tunnel] [i40e-mlx4] [$CHOST]</whiteboard>
+              <whiteboard>[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$CHOST] [$SHOST] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4] </whiteboard>
               <recipeSet priority="High">
-                <recipe whiteboard="[$TEST_INFO] [$test_compose] [Performace] [$test_ovs_rpm] [ovs-dpdk-tunnel] [i40e-mlx4] [$CHOST]" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
-                  <autopick random="false"/>
-                  <watchdog panic="None"/>
-                  <packages/>
-                  <ks_appends>
-                    <ks_append><![CDATA[
-            %post
-            cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
-            [beaker-postrepo0]
-            name=beaker-postrepo0
-            baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
-            enabled=1
-            gpgcheck=0
-            skip_if_unavailable=1
-            EOF
-            %end
-            ]]></ks_append>
-                  </ks_appends>
-                  <repos/>
-                  <distroRequires>
-                    <and>
-                      <distro_name op="=" value="$test_compose"/>
-                      <distro_variant op="=" value="BaseOS"/>
-                      <distro_arch op="=" value="x86_64"/>
-                    </and>
-                  </distroRequires>
-                  <hostRequires>
-                    <and>
-                      <hostname value="$CHOST" op="="/>
-                    </and>
-                    <system_type value="Machine"/>
-                  </hostRequires>
-                  <partitions/>
-                  <task name="/distribution/install" role="SERVERS">
-                    <params>
-                      <param name="DISTRO_BUILD" value="$test_compose"/>
-                    </params>
-                  </task>
-                  <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="SERVERS">
-                     <params>
-                      <param name="NAY" value="yes"/>
-                      <param name="nic_port0" value="$CNIC_PORT0_8x"/>
-                      <param name="nic_port1" value="$CNIC_PORT1_8x"/>
-                      <param name="tunnel_flag" value="gre"/>
-                      <param name="ip_flag" value="ipv4"/>
-                      <param name="NUMA_NODE" value="1"/>
-                      <param name="driver_name" value="$CNIC_TYPE"/>
-                      <param name="nic1_mac" value="3c:fd:fe:a0:38:d0"/>
-                      <param name="dpdk_rpm" value="$test_dpdk"/>
-                      <param name="dpdk_tools_rpm" value="$test_dpdk_tools"/>
-                      <param name="guest_openvswitch_rpm" value="$test_ovs_rpm"/>
-                      <param name="openvswitch_rpm" value="$test_ovs_rpm"/>
-                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
-                    </params>
-                  </task>
-                  <task name="/distribution/reservesys" role="STANDALONE">
-                    <params>
-                      <param name="RESERVETIME" value="86400"/>
-                      <param name="KILLTIMEOVERRIDE" value="64800"/>
-                    </params>
-                  </task>
-                </recipe>
-                <recipe whiteboard="[$TEST_INFO] [$test_compose] [Performace] [$test_ovs_rpm] [ovs-dpdk-tunnel] [i40e-mlx4] [$CHOST]" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$SHOST] [SERVERS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4] " role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
                   <autopick random="false"/>
                   <watchdog panic="None"/>
                   <packages/>
@@ -729,8 +738,8 @@
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
                   </task>
-                  <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="CLIENTS">
-                    <params>
+                  <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="SERVERS">
+                     <params>
                       <param name="NAY" value="yes"/>
                       <param name="nic_port0" value="$SNIC_PORT0_8x"/>
                       <param name="nic_port1" value="$SNIC_PORT1_8x"/>
@@ -738,18 +747,89 @@
                       <param name="ip_flag" value="ipv4"/>
                       <param name="NUMA_NODE" value="1"/>
                       <param name="driver_name" value="$SNIC_TYPE"/>
+                      <param name="dpdk_rpm" value="$test_dpdk"/>
+                      <param name="dpdk_tools_rpm" value="$test_dpdk_tools"/>
+                      <param name="openvswitch_rpm" value="$test_ovs_rpm"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                      <param name="NetScout_client_nic1" value="$CNETSCOUT_PORT0"/>
+                      <param name="NetScout_client_nic2" value="$CNETSCOUT_PORT1"/>
+                      <param name="NetScout_server_nic1" value="$SNETSCOUT_PORT0"/>
+                      <param name="NetScout_server_nic2" value="$SNETSCOUT_PORT1"/>
+                      <param name="NetScout_speed" value="100"/>
+                      <param name="QCOW_LOC" value="Westford"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="SERVERS">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$RESERVETIME"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$CHOST] [CLIENTS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4]" role=CLIENTS"None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post
+            cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+            [beaker-postrepo0]
+            name=beaker-postrepo0
+            baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+            enabled=1
+            gpgcheck=0
+            skip_if_unavailable=1
+            EOF
+            %end
+            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$test_compose"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$CHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions/>
+                  <task name="/distribution/install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$test_compose"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-tunneling-beijing" role="CLIENTS">
+                    <params>
+                      <param name="NAY" value="yes"/>
+                      <param name="nic_port0" value="$CNIC_PORT0_8x"/>
+                      <param name="nic_port1" value="$CNIC_PORT1_8x"/>
+                      <param name="tunnel_flag" value="gre"/>
+                      <param name="ip_flag" value="ipv4"/>
+                      <param name="NUMA_NODE" value="1"/>
+                      <param name="driver_name" value="$CNIC_TYPE"/>
                       <param name="nic1_mac" value="e4:1d:2d:1e:d2:e0"/>
                       <param name="dpdk_rpm" value="$test_dpdk"/>
                       <param name="dpdk_tools_rpm" value="$test_dpdk_tools"/>
-                      <param name="guest_openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="openvswitch_rpm" value="$test_ovs_rpm"/>
                       <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                      <param name="NetScout_client_nic1" value="$CNETSCOUT_PORT0"/>
+                      <param name="NetScout_client_nic2" value="$CNETSCOUT_PORT1"/>
+                      <param name="NetScout_server_nic1" value="$SNETSCOUT_PORT0"/>
+                      <param name="NetScout_server_nic2" value="$SNETSCOUT_PORT1"/>
+                      <param name="NetScout_speed" value="100"/>
+                      <param name="QCOW_LOC" value="Westford"/>
                     </params>
                   </task>
-                  <task name="/distribution/reservesys" role="STANDALONE">
+                  <task name="/distribution/reservesys" role="CLIENTS">
                     <params>
-                      <param name="RESERVETIME" value="86400"/>
-                      <param name="KILLTIMEOVERRIDE" value="64800"/>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$RESERVETIME"/>
                     </params>
                   </task>
                 </recipe>
