@@ -1,0 +1,639 @@
+- job-template:
+    name: 'Interopt/kernel-qe-ovs211-ci-rhel81-interopt'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        - string:
+            name: NOTES
+            default: ""
+            description: Run Notes
+        - string:
+            name: RPM_OVS
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el8fdp/x86_64/openvswitch2.11-2.11.0-50.el8fdp.x86_64.rpm"
+            description: RPM_OVS brew location of OVS RPM
+        - string:
+            name: RPM_CONTAINER_SELINUX_POLICY
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/container-selinux/2.84/2.el7_6/noarch/container-selinux-2.84-2.el7_6.noarch.rpm"
+            description: (RHEL 7.x) RPM_CONTAINER_SELINUX_POLICY brew location of OVS RPM
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_POLICY
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/22.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-22.el8fdp.noarch.rpm"
+            description: RPM_OVS_SELINUX_EXTRA_POLICY brew location of  RPM
+        - string:
+            name: RPM_DPDK
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-18.11.2-4.el8.x86_64.rpm"
+            description: dpdk rpm location
+        - string:
+            name: RPM_DPDK_TOOLS
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-tools-18.11.2-4.el8.x86_64.rpm"
+            description: dpdk tools rpm location
+        - string:
+            name: RPM_DRIVERCTL
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.95/4.el8/noarch/driverctl-0.95-4.el8.noarch.rpm"
+            description: RPM of DRIVERCTL
+        - string:
+            name: fdp_release
+            default: FDP 18.11
+            description: fdp_release
+        - string:
+            name: COMPOSE
+            default: RHEL-8.1.1-20191023.n.0
+            description: compose
+        - string:
+            name: CHOST
+            default: netqe13.knqe.lab.eng.bos.redhat.com
+            description: First Nic port to use
+        - string:
+            name: CNIC_PORT1
+            default: enp132s0f1
+            description: Second Nic port to use
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        - string:
+            name: RPM_PYTHON_XML
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/python-lxml/4.2.3/1.el8/x86_64/python3-lxml-4.2.3-1.el8.x86_64.rpm"
+            description: Python XML
+        # - string:
+        #     name: BREW_TASKID
+        #     default: '21199235'
+        #     description: 'OVS brew build ID for manual trigger. Example: 21199235. '
+    triggers:
+        - ci-trigger:
+            # Sample job trigger for official Brew builds
+            # Build NVR in $name $version $release
+            override-topic: "Consumer.rh-jenkins-ci-plugin.d7f4e2747-a01e-4527-b81d-e93696a0c01f.VirtualTopic.qe.ci.product-scenario.build.complete.>"
+            message-checks:
+                - field: $..products.*.nvr
+                  value: ovs-2.11
+                - field: $..products.*.nvr
+                  value: RHEL-8.1.*
+
+
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+
+    builders:
+        - python: |
+            import ast
+            import json
+            import os
+            import pprint
+
+            def main():
+              # Cleanup Environment
+              PROP_FILE=os.environ['WORKSPACE']+'/job1.properties'
+              if os.path.isfile(PROP_FILE):
+                 os.remove(PROP_FILE)
+                 print('Cleaned up '+PROP_FILE)
+              else:
+                 print(os.environ['WORKSPACE']+'/job1.properties not found')
+
+              print('Starting CI Message Python script')
+              # Get the list of user's 
+              # environment variables 
+              # env_var = os.environ 
+  
+              # Print the list of user's 
+              # environment variables 
+              # print("User's Environment variable:") 
+              # pprint.pprint(dict(env_var), width = 1) 
+              print("Getting CI_MESSAGE Location")
+              MSG_FILE=os.environ['WORKSPACE']+'/CI_MESSAGE.json'
+              #print("MSG_FILE="+MSG_FILE)
+              COMPOSE = os.environ['compose']
+              if (os.environ.get('CI_MESSAGE')):
+                # convert message to json object
+                print('CI Trigger load new CI_MEASSAGE')
+                message = json.loads(os.getenv('CI_MESSAGE'))
+                print("Triggered CI Message:\n".format(json.dumps(message, indent=4)))
+                COMPOSE=message['system'][0]['os']
+                # variant=message['system'][0]['variant']
+
+              #else:
+                #with open(MSG_FILE) as f:
+                  #message = json.load(f)
+                  #print('Manual Trigger load old CI_MESSAGE.json')
+                  #print("Triggered CI Manual Message:\n".format(json.dumps(message, indent=4)))
+                  #compose=message['system'][0]['os']  # Test Loading Compose from old CI_MESSAGE
+ 
+              # Save updated Compose 
+              #os.environ['compose']=COMPOSE
+              #print('New Compose='+os.environ['COMPOSE'])
+              with open(os.environ['WORKSPACE']+'/job1.properties', "w") as job1:
+                job1.write('COMPOSE='+os.environ['compose']+'\n')
+
+            if __name__ == "__main__":
+              main()
+        - inject:
+              properties-file: $WORKSPACE/job1.properties
+
+        - shell: |
+            #!/bin/bash
+            echo '****************************** Submit Beaker jobs ************************'
+            echo '***  job1.properties'
+            cat $WORKSPACE/job1.properties
+            echo 'RPM_OVS='$RPM_OVS
+            grep COMPOSE $WORKSPACE/job1.properties >$WORKSPACE/compose.txt
+            COMPOSE=`cut -d '=' -f2 $WORKSPACE/compose.txt`
+            echo 'COMPOSE='$COMPOSE
+            echo COMPOSE_USED=$COMPOSE >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Sanity Test 1: sanity_check#
+            ##########################
+            rm -f $WORKSPACE/job1html.txt
+            rm -f $WORKSPACE/bkr_job1.txt
+            rm -f $WORKSPACE/bkr_jobnum1.txt
+            echo "Test 1: sanity_check =============================================="
+            echo 'COMPOSE='$COMPOSE
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job1.xml
+            <job retention_tag="60days">
+              <whiteboard>[Interopt RHEL-81-ovs211-sanity_check][$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL] openvswitch/sanity_check</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[Interopt RHEL-81-ovs211-sanity_check][$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL] openvswitch/sanity_check" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="ignore"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+                    %post --log=/root/my-ks-post.log
+
+            yum install -y $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_OVS
+
+            yum install -y $RPM_DRIVERCTL
+
+            yum install -y $RPM_DPDK $RPM_DPDK_TOOLS
+
+            yum install -y libvirt $RPM_PYTHON_XML
+
+            yum install -y qemu-kvm
+
+            yum install -y http://repo.iotti.biz/CentOS/7/x86_64/netperf-2.7.0-1.el7.lux.x86_64.rpm
+
+            %end
+
+                            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_variant op="=" value="BaseOS"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_name op="=" value="$COMPOSE"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <system_type op="=" value="machine"/>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="STANDALONE">
+                    <params>
+                      <param name="CMDS_TO_RUN" value="yum install -y  policycoreutils-python;rpm -ivh --force $RPM_OVS_SELINUX_EXTRA_POLICY"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/openvswitch/sanity_check" role="STANDALONE">
+                    <params>
+                      <param name="dbg_flag" value="set -x"/>
+                      <param name="RPM_OVS_SELINUX_EXTRA_POLICY" value="$RPM_OVS_SELINUX_EXTRA_POLICY"/>
+                      <param name="RPM_OVS" value="$RPM_OVS"/>
+                      <param name="NAY" value="yes"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="skip_traffic_tests" value="yes"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job1.xml
+            bkr job-submit $WORKSPACE/job1.xml |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+
+
+            ##########################
+            #Sanity Test 2: sellinux Test#
+            ##########################
+            rm -f $WORKSPACE/job2html.txt
+            rm -f $WORKSPACE/bkr_job2.txt
+            rm -f $WORKSPACE/bkr_jobnum2.txt
+            echo "Test 2: ovs-dpdk-selinux =============================================="
+            echo 'COMPOSE='$COMPOSE
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job2.xml
+            <job retention_tag="60days">
+              <whiteboard>[$TEST_VER] [Interopt RHEL-8.1-ovs211-ovs-dpdk-selinux] [$TEST_VER] [$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL] /kernel/networking/ovs-dpdk-selinux</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_VER] [Interopt RHEL-8.1-ovs211-ovs-dpdk-selinux] [$TEST_VER] [$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL] /kernel/networking/ovs-dpdk-selinux" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="ignore"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post --log=/root/my-ks-post.log
+
+            yum install -y $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_OVS
+
+            yum install -y $RPM_DRIVERCTL
+
+            yum install -y $RPM_DPDK $RPM_DPDK_TOOLS
+
+            yum install -y libvirt $RPM_PYTHON_XML
+
+            yum install -y qemu-kvm
+
+            yum install -y http://repo.iotti.biz/CentOS/7/x86_64/netperf-2.7.0-1.el7.lux.x86_64.rpm
+
+
+            %end
+
+                            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_variant op="=" value="BaseOS"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_name op="=" value="$COMPOSE"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <system_type op="=" value="machine"/>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="STANDALONE">
+                    <params>
+                      <param name="CMDS_TO_RUN" value="yum install -y  policycoreutils-python;rpm -ivh --force $RPM_OVS_SELINUX_EXTRA_POLICY"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk-selinux" role="STANDALONE">
+                    <params>
+                      <param name="dbg_flag" value="set -x"/>
+                      <param name="nic_port0" value="$CNIC_PORT0"/>
+                      <param name="nic_port1" value="$CNIC_PORT1"/>
+                      <param name="DISTRO_BUILD" value="$COMPOSE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job2.xml
+            bkr job-submit $WORKSPACE/job2.xml |tee $WORKSPACE/bkr_job2.txt
+            grep Submitted $WORKSPACE/bkr_job2.txt >$WORKSPACE/bkr_jobnum2.txt
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job2html.txt
+            BKR_JOBID2html=`cut -d\: -f2 $WORKSPACE/job2html.txt`
+            echo 'BKR_JOBID2html='$BKR_JOBID2html >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Sanity Test 3: userspace Test#
+            ##########################
+            rm -f $WORKSPACE/job3html.txt
+            rm -f $WORKSPACE/bkr_job3.txt
+            rm -f $WORKSPACE/bkr_jobnum3.txt
+            echo "Test 3: user_space =============================================="
+            echo 'COMPOSE='$COMPOSE
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job3.xml
+            <job retention_tag="60days">
+              <whiteboard>[Interopt RHEL-8.1-ovs211-userspace] [$TEST_VER] [$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL]  , /kernel/networking/openvswitch/userspace_commands</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[Ineropt RHEL-8.1-ovs211-userspace] [$TEST_VER] [$COMPOSE]  [$RPM_OVS] [IXGBE] [$CHOST] [$BUILD_URL] /kernel/networking/openvswitch/userspace_commands" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="ignore"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post --log=/root/my-ks-post.log
+
+            yum install -y $RPM_OVS_SELINUX_EXTRA_POLICY $RPM_OVS
+
+            yum install -y $RPM_DRIVERCTL
+
+            yum install -y libvirt $RPM_PYTHON_XML
+
+            yum install -y qemu-kvm
+
+            yum install -y http://repo.iotti.biz/CentOS/7/x86_64/netperf-2.7.0-1.el7.lux.x86_64.rpm
+
+            %end
+
+                            ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_variant op="=" value="BaseOS"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_name op="=" value="$COMPOSE"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="like" value="$CHOST"/>
+                            </and>
+                            <system_type op="=" value="machine"/>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="STANDALONE">
+                    <params>
+                      <param name="CMDS_TO_RUN" value="yum install -y  policycoreutils-python;rpm -ivh --force $RPM_OVS_SELINUX_EXTRA_POLICY"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/openvswitch/userspace_commands" role="STANDALONE">
+                    <params>
+                      <param name="NIC_SPEED" value="10g"/>
+                      <param name="NIC_NUM" value="all"/>
+                      <param name="dbg_flag" value="set -x"/>
+                      <param name="RPM_OVS_SELINUX_EXTRA_POLICY" value="$RPM_OVS_SELINUX_EXTRA_POLICY"/>
+                      <param name="RPM_OVS" value="$RPM_OVS"/>
+                      <param name="DISTRO_BUILD" value="$COMPOSE"/>
+
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job3.xml
+            bkr job-submit $WORKSPACE/job3.xml |tee $WORKSPACE/bkr_job3.txt
+            grep Submitted $WORKSPACE/bkr_job3.txt >$WORKSPACE/bkr_jobnum3.txt
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job3html.txt
+            BKR_JOBID3html=`cut -d\: -f2 $WORKSPACE/job3html.txt`
+            echo 'BKR_JOBID3html='$BKR_JOBID3html >> $WORKSPACE/job1.properties
+            echo $BKR_JOBID3html
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $BKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+
+            #!/bin/bash -x
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID2
+            bkr job-results --format junit-xml $BKR_JOBID2 > $WORKSPACE/jobid1.xml
+            TESTS_JOB2=$(grep 'testsuite name' $WORKSPACE/jobid2.xml)
+            echo $TESTS_JOB2
+
+            #####################################################################
+            # Get Beaker Job 2 job-results
+            #####################################################################
+            BKR_TESTS_JOB2_EXEC=0
+            BKR_TESTS_JOB2_FAILED=0
+            for jobid in $BKR_JOBID2; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid2.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid2.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB2_EXEC=$((BKR_TESTS_JOB2_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB2_FAILED=$((BKR_TESTS_JOB2_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB2_EXEC=$BKR_TESTS_JOB2_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB2_FAILED=$BKR_TESTS_JOB2_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB2=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB2_EXEC"'", "failed": "'"$BKR_TESTS_JOB2_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB2
+            echo "BKR_TESTS_JOB2=$BKR_TESTS_JOB2" >> $WORKSPACE/job1.properties
+
+            #echo $?
+            #!/bin/bash -x
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID3
+            #echo $?
+            bkr job-results --format junit-xml $BKR_JOBID3 > $WORKSPACE/jobid3.xml
+            TESTS_JOB3=$(grep 'testsuite name' $WORKSPACE/jobid3.xml)
+            echo $TESTS_JOB3
+
+            #####################################################################
+            # Get Beaker Job 3 job-results
+            #####################################################################
+            BKR_TESTS_JOB3_EXEC=0
+            BKR_TESTS_JOB3_FAILED=0
+            for jobid in $BKR_JOBID3; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid3.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid3.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB3_EXEC=$((BKR_TESTS_JOB3_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB3_FAILED=$((BKR_TESTS_JOB3_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB3_EXEC=$BKR_TESTS_JOB3_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB3_FAILED=$BKR_TESTS_JOB3_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB3=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB3_EXEC"'", "failed": "'"$BKR_TESTS_JOB3_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB3
+            echo "BKR_TESTS_JOB3=$BKR_TESTS_JOB3" >> $WORKSPACE/job1.properties
+            echo "TEST_RESULT=$BKR_JOBID1+BKR_JOBID2+BKR_JOBID3" >> $WORKSPACE/job1.properties
+
+            #####################################################################
+            # Get Final -results
+            #####################################################################
+            BKR_TESTS_EXEC=$((BKR_TESTS_JOB1_EXEC+BKR_TESTS_JOB2_EXEC+BKR_TESTS_JOB3_EXEC)) || BKR_TESTS_EXEC=0
+            echo "BKR_TESTS_EXEC=$BKR_TESTS_EXEC" >> $WORKSPACE/job1.properties
+            echo "BKR_TESTS_EXEC=$BKR_TESTS_EXEC"
+            BKR_TESTS_FAILED=$((BKR_TESTS_JOB1_FAILED+BKR_TESTS_JOB2_FAILED+BKR_TESTS_JOB3_FAILED)) || BKR_TESTS_FAILED=-1
+            echo "BKR_TESTS_FAILED=$BKR_TESTS_FAILED" >> $WORKSPACE/job1.properties
+            echo "BKR_TESTS_FAILED=$BKR_TESTS_FAILED"
+
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+        - python: |
+            import ast
+            import json
+            import os
+            def main():
+              """Build message to report rhel layered product results to interop qe."""
+              # convert message to json object
+              message = json.loads(os.getenv('CI_MESSAGE'))
+              print("Triggered CI Message:\n".format(json.dumps(message, indent=4)))
+              # update contact object in the message
+              message['contact'].update(
+                {{
+                     "name": "Fast Datapath QE RHEL 8.1 OVS 2.11 Interopt",
+                     "team": "Fast Datapath QE",
+                     "docs": os.environ['JENKINS_URL'],
+                     "email": "bfubel@redhat.com",
+                     "url": os.environ['JENKINS_URL']
+                }}
+              )
+              # add run object to message
+              message['run'] = {{
+                     "url": os.environ['JENKINS_URL'],
+                     "log": os.environ['JENKINS_URL'] + "console"
+                }}
+
+              # add test object to message
+              message['test'] = {{
+                     "category": "interoperability",
+                     "namespace": "interop",
+                     "type": "product-scenario",
+                     "result": os.environ['TEST_RESULT'],
+                     "xunit_urls": ast.literal_eval(os.environ['XUNIT_URLS'])
+                }}
+
+              print("product-scenario.test.complete message:\n{{}}".format(json.dumps(message, indent=4)))
+
+              # write message to properties file (java formatted)
+              with open("return-ci-message.prop", "w") as f:
+                f.write("RETURN_CI_MESSAGE={{}}".format(json.dumps(message)))
+
+            if __name__ == "__main__":
+                # Setting some environment variables with data needed to supply back to
+                # interop qe. These will need to be adjusted based on the run
+                if  int(os.environ['BKR_TESTS_FAILED']) == 0:
+                  os.environ['TEST_RESULT'] = "passed"
+                else:
+                  os.environ['TEST_RESULT'] = "failed"
+                os.environ['XUNIT_URLS'] = '["https://beaker.engineering.redhat.com/jobs/{{0}}.junit.xml", \
+                "https://beaker.engineering.redhat.com/jobs/{{1}}.junit.xml", \
+                "https://beaker.engineering.redhat.com/jobs/{{2}}.junit.xml"]'.format(
+                  os.getenv('BKR_JOBID1html'), os.getenv('BKR_JOBID2html'), os.getenv('BKR_JOBID3html'))
+                main()
+
+        - inject:
+            properties-file: $WORKSPACE/return-ci-message.prop
+                # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+
+    publishers:
+        - ci-publisher:
+            override-topic: 'VirtualTopic.qe.ci.product-scenario.test.complete'
+            message-type: 'Custom'
+            message-content: '${{RETURN_CI_MESSAGE}}'
+
+        - email-ext:
+            recipients: bfubel@redhat.com
+            subject: interopt/kernel-qe-ovs211-ci-rhel81-interopt $CHOST, $COMPOSE_USED, $BUILD_URL $RPM_OVS
+            body: |
+              Beaker Job "kernel/networking/Sanity_Check" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+              Beaker Job "kernel/networking/ovs-dpdk-selinux" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID2html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB2_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB2_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB2"}}
+              Beaker Job "kernel/networking/openvswitch/userspace_commands" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID3html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB3_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+
+              
+              interopt/kernel-qe-ovs211-ci-rhel81-interopt
+              Notes, ${{ENV,var="NOTES"}}
+              $BUILD_URL,Sanity_Check,${{ENV,var="BKR_TESTS_JOB1_EXEC"}},${{ENV,var="BKR_TESTS_JOB1_FAILED"}},ovs-dpdk-selinux,${{ENV,var="BKR_TESTS_JOB2_EXEC"}},${{ENV,var="BKR_TESTS_JOB2_FAILED"}},userspace_commands,${{ENV,var="BKR_TESTS_JOB3_EXEC"}},${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+              Job Parameters
+              Compose,${{ENV,var="COMPOSE_USED"}}
+              RPM_OVS,${{ENV,var="RPM_OVS"}}
+              RPM_CONTAINER_SELINUX_POLICY,${{ENV,var="RPM_CONTAINER_SELINUX_POLICY"}}
+              RPM_OVS_SELINUX_EXTRA_POLICY,${{ENV,var="RPM_OVS_SELINUX_EXTRA_POLICY"}}
+              fdp_release,${{ENV,var="fdp_release"}}
+              machine,${{ENV,var="CHOST"}}
+              nic_port0,${{ENV,var="nic_port0"}}
+              nic_port1,${{ENV,var="nic_port1"}}
+              ARCH,${{ENV,var="ARCH"}}
+
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+        # - workspace-cleanup:
+        # #   include:
+        # #       - "*"
+        # #   exclude:
+        # #       #need resources file to trigger teardown job
+        # #       - "job1.properties.txt"
+        # #   dirmatch: true
+        #     clean-if:
+        #         - success: true
+        #         - not-built: true
+
+
+- project:
+    name: kernel-qe
+    jobs:
+      - 'Interopt/kernel-qe-ovs211-ci-rhel81-interopt'
+###########################################################
+#                        History                          #
+###########################################################
+# Date            Modifier    Details
+# 19-Aug-2019     bfubel    Created off 7.7 Nightly Build
+#                          Need to Change to 8.1 Image. starting with 7.7 to get baseline
+#                          Removed Referance to OVS_RPM. needs to be RPM_OVS
