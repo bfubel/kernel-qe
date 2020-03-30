@@ -1,0 +1,227 @@
+- job-template:
+    name: 'Gating/kernel-qe-driverctl-rhel81-gating-ci'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        - string:
+            name: compose
+            default: "RHEL-8.1.0-20190806.2"
+            description: compose
+        - string:
+            name: dpdk_rpm
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-18.11.2-4.el8.x86_64.rpm"
+            description: dpdk rpm location
+        - string:
+            name: dpdk_tools_rpm
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-tools-18.11.2-4.el8.x86_64.rpm"
+            description: dpdk tools rpm location
+        - string:
+            name: machine
+            default: netqe13.knqe.lab.eng.bos.redhat.com
+            description: machine to run beaker job on
+        - string:
+            name: nic_port0
+            default: enp129s0f0
+            description: First Nic port to use
+        - string:
+            name: nic_port1
+            default: enp129s0f1
+            description: Second Nic port to use
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        - string:
+            name: variant
+            default: BaseOS
+            description: Distro
+
+    triggers:
+        - ci-trigger:
+            # Sample job trigger for official Brew builds
+            # Build NVR in $name $version $release
+            jms-selector: new = 'CLOSED'
+            override-topic: "Consumer.rh-jenkins-ci-plugin.bfubel-kernelqe-2ab7143371a7427ab0a1eee17a070221.VirtualTopic.eng.rtt.ci.>"
+            message-checks:
+                - field: $.info.method
+                  value: buildArch
+                - field: $.info.request[0]
+                  value: .*/dpdk-18.11?-\d+\.\d+\.\d+-\d+(?!.*el7)(?!.*_lnst_jenkins_test).*\.src\.rpm
+                - field: $.info.request[2]
+                  value: x86_64
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+    builders:
+        - shell: |
+            echo "Process Trigger"
+            #!/bin/bash
+            # remove values from previous build
+            > $WORKSPACE/CI_MESSAGE_ENV.txt
+            > $WORKSPACE/job1.properties
+            if ! [ -z "$CI_MESSAGE" ]
+               then
+               echo "CI trigger!"
+               echo '{{$CI_MESSAGE}}' | tee "$WORKSPACE/CI_MESSAGE.txt"
+               echo ${{CI_MESSAGE}} | tee "$WORKSPACE/CI_MESSAGE.json"
+               #Parsing BREW TASK ID
+               RE_TASK_ID='"id": ([0-9]+),'
+               if [[  $CI_MESSAGE =~ $RE_TASK_ID ]]
+                  then
+                  echo "Brew task id parsed to be ${{BASH_REMATCH[1]}}"
+                  BREW_TASKID=${{BASH_REMATCH[1]}}
+                  echo "BREW_TASKID=${{BREW_TASKID}}" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
+                  # Get DPDK RPM from the build id
+                  build_id=`brew buildinfo $BREW_TASKID | sed -n 's/BUILD: //p'|awk '{{print $2}}'  | sed 's/[)(]//g'`
+                  echo "build ID=$build_id"
+                  build_name=brew taskinfo 21828173 | sed -n 's/Build: //p'|awk '{{print $1}}'
+                  rpm_location=`brew buildinfo $build_id | grep $build_name |grep $ARCH`
+                  echo $rpm_location
+                  echo "${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+                  RPM_DPDK="${{rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com}}"
+                  echo "RPM_DPDK=$RPM_DPDK"
+                  echo "RPM_DPDK=$RPM_DPDK" >>  "$WORKSPACE/job1.properties"
+                  rpm_location_tools=`brew buildinfo $build_id | grep tools |grep $ARCH`
+                  echo "${{rpm_location_tools/\mnt/redhat/http://download.eng.bos.redhat.com}}"
+                  RPM_DPDK_TOOLS="${{rpm_location_tools/\mnt/redhat/http://download.eng.bos.redhat.com}}"
+                  echo "RPM_DPDK_TOOLS=$RPM_DPDK_TOOLS"
+                  echo "RPM_DPDK_TOOLS=$RPM_DPDK_TOOLS" >>  "$WORKSPACE/job1.properties"
+                else
+                  echo "Id searched with regex '${{RE_TASK_ID}}' was not found!"
+                  return 1 2> /dev/null || exit 1
+                fi
+               else
+                echo "Manual trigger!"
+                echo "Brew task id is ${{BREW_TASKID}}"
+                echo "BREW_TASKID=${{BREW_TASKID}}" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
+               fi
+               owner=`brew taskinfo ${{BREW_TASKID}} | sed -n 's/Owner: //p'`
+               echo "owner=$owner" >>  "$WORKSPACE/CI_MESSAGE_ENV.txt"
+               echo "triggered_by=$BUILD_USER_ID" >> "$WORKSPACE/CI_MESSAGE_ENV.txt"
+               echo "triggered_by=$BUILD_USER_ID" >> "$WORKSPACE/job1.properties"
+               pushd "$WORKSPACE"
+               rm -f *.xml
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+        - shell: |
+            #!/bin/bash
+            echo "queue Jobs"
+
+            cat $WORKSPACE/job1.properties
+
+            ####################################################
+            # Manual Run use RPM location for OVS not Build ID #
+            ####################################################
+
+            ##########################
+            #Test 1: dpdk-only#
+            ##########################
+            rm -f $WORKSPACE/job1html.txt
+            echo "Test 1: dpdk-only =============================================="
+            machine="netqe14.knqe.lab.eng.bos.redhat.com"
+            nic_port0="enp129s0f0"
+            mtu_size="9000"
+            SELINUX"Enforcing"
+            dpdk_lcore-mask"0x000f"
+            pmd_cpu_mask"0xf000"
+            dpdk_rpm"http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/17.11/7.el7/x86_64/dpdk-17.11-7.el7.x86_64.rpm"
+            dpdk_tools_rpm="http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/17.11/7.el7/x86_64/dpdk-tools-17.11-7.el7.x86_64.rpm"
+            openvswitch_rpm="http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/1.el7fdp/x86_64/openvswitch-2.9.0-1.el7fdp.x86_64.rpm "
+            no_tunnel="no"
+            tunnel_flag="vxlan"
+            stress_flag="no"
+            ip_flag="ipv4"
+            stress_duration="3600"
+            KILLTIMEOVERRIDE="86400"
+            cd /mnt/tests/kernel/networking/ovs-dpdk-tunneling
+            lstest | runtest $compose --variant="BaseOS" --arch=$ARCH --machine=$machine --systype=machine --param=dbg_flag="set -x" --param=nic_port0=$nic_port0 --param=mtu_size=$mtu_size --param=SELINUX=$SELINUX --param=dpdk_lcore-mask=$dpdk_lcore-mask --param=pmd_cpu_mask=$pmd_cpu_mask --param=dpdk_rpm=$dpdk_rpm --param=dpdk_tools_rpm=$dpdk_tools_rpm --param=openvswitch_rpm=$openvswitch_rpm --param=no_tunnel=$no_tunnel --param=tunnel_flag=$tunnel_flag --param=stress_flag=$stress_flag --param=ip_flag=ip_flag --param=stress_duration=$stress_duration --param=KILLTIMEONVERRIDE=$KILLTIMEOVERRIDE --wb=" $name $BUILD_URL /n $compose, dpdk-only/Gating_check" |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            machine="netqe18.knqe.lab.eng.bos.redhat.com"
+            nic_port0="ens3f0"
+            lstest | runtest $compose --variant="BaseOS" --arch=$ARCH --machine=$machine --systype=machine --param=dbg_flag="set -x" --param=nic_port0=$nic_port0 --param=mtu_size=$mtu_size --param=SELINUX=$SELINUX --param=dpdk_lcore-mask=$dpdk_lcore-mask --param=pmd_cpu_mask=$pmd_cpu_mask --param=dpdk_rpm=$dpdk_rpm --param=dpdk_tools_rpm=$dpdk_tools_rpm --param=openvswitch_rpm=$openvswitch_rpm --param=no_tunnel=$no_tunnel --param=tunnel_flag=$tunnel_flag --param=stress_flag=$stress_flag --param=ip_flag=ip_flag --param=stress_duration=$stress_duration --param=KILLTIMEONVERRIDE=$KILLTIMEOVERRIDE --wb=" $name $BUILD_URL /n $compose, dpdk-only/Gating_check" |tee $WORKSPACE/bkr_job2.txt
+
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo $BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $BKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+    publishers:
+        # - postbuildscript:
+        #    builders:
+        #       - shell: 'echo "Shell execution"'
+ #           publishers:
+         # - postbuildscript:
+         #    mark-unstable-if-failed: true
+            # builders:
+            #   build-on:
+            #     - SUCCESS
+            #     - UNSTABLE
+                # build-steps:
+                #   - shell: |
+                #       #!/bin/bash
+                #       echo "Jenkins job failed or canceled - canceling any submitted Beaker jobs"
+                #       bkr job-cancel ${{BKR_JOBID1}}
+#       - postbuildscript:
+        - email-ext:
+            recipients: bfubel@redhat.com
+            subject: Gating/kernel-qe-driverctl-rhel81-gating-ci $compose
+            body: |
+              Beaker Job "kernel/networking/dpdk-only" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+               Job parameters --------------------------------------------------
+               compose=${{ENV,var="compose"}}
+               dpdk_rpm=${{ENV,var="dpdk_rpm"}}
+               machine=${{ENV,var="machine"}}
+
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+- project:
+    name: kernel-qe
+    jobs:
+      - 'Gating/kernel-qe-driverctl-rhel81-gating-ci'
