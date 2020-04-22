@@ -1,0 +1,997 @@
+- job-template:
+    name: 'performace/kernel-qe-ovs-bug1468631-ixgbe-ci'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        - string:
+            name: COMPOSE_77
+            default: "RHEL-7.7-20190716.0"
+            description: "RHEL-7.7 compose"
+        - string:
+            name: COMPOSE_80
+            default: "RHEL-8.0.0-20190321.0"
+            description: "RHEL-8.0 Compose"
+        - string:
+            name: COMPOSE_81
+            default: "RHEL-8.1.0-20191015.0"
+            description: "RHEL-8.1 Compose"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/14.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-14.el7fdp.noarch.rpm"
+            description: "RHEL-7.7 openvswitch-selinux-extra-policy rpm location"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/19.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-19.el8fdp.noarch.rpm"
+            description: "RHEL-8.0 openvswitch-selinux-extra-policy rpm location"
+        - string:
+            name: RPM_OVS290_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/124.el7fdp/x86_64/openvswitch-2.9.0-124.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.90 RPM"
+        - string:
+            name: RPM_OVS211_77
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/35.el7fdp/x86_64/openvswitch2.11-2.11.0-35.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_77
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/12.el7fdp/x86_64/openvswitch2.12-2.12.0-12.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.12 RPM"
+        - string:
+            name: RPM_OVS211_80
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/35.el8fdp/x86_64/openvswitch2.11-2.11.0-35.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_80
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/12.el8fdp/x86_64/openvswitch2.12-2.12.0-12.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.12 RPM"
+        - string:
+            name: RPM_DRIVERCTL
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.108/1.el8/noarch/driverctl-0.108-1.el8.noarch.rpm"
+            description: RPM Location for DRIVERCTL
+        - string:
+            name: RPM_DPDK_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7/x86_64/dpdk-18.11.2-1.el7.x86_64.rpm"
+            description: RPM location for DPDK 7.x
+        - string:
+            name: RPM_DPDK_TOOLS_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/1.el7/x86_64/dpdk-tools-18.11.2-1.el7.x86_64.rpm"
+            description: RPM location for DPDK tools 7.x
+        - string:
+            name: RPM_DPDK_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-18.11.2-4.el8.x86_64.rpm"
+            description: RPM location for DPDK 8.x
+        - string:
+            name: RPM_DPDK_TOOLS_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-tools-18.11.2-4.el8.x86_64.rpm"
+            description: RPM location for DPDK tools 8.x
+        - string:
+            name: CHOST
+            default: "netqe18.knqe.lab.eng.bos.redhat.com"
+            description: client Host
+        - string:
+            name: CNIC_PORT0
+            default: "ens6f0"
+            description: Client nic_port0 7.x Name
+        - string:
+            name: CNIC_PORT1
+            default: "ens6f1"
+            description: Client nic_port1 7.x Name
+        - string:
+            name: CNIC_PORT0_80
+            default: "enp129s0f0"
+            description: Client nic_port0 8.x Name
+        - string:
+            name: CNIC_PORT1_80
+            default: "enp129s0f1"
+            description: Client nic_port1 8.x Name
+        - string:
+            name: CNETSCOUT_PORT0
+            default: "NETQE18_ENS6F0"
+            description: Client Netscout port 0
+        - string:
+            name: CNETSCOUT_PORT1
+            default: "NETQE18_ENS6F1"
+            description: Client Netscout port 1
+        - string:
+            name: SHOST
+            default: "netqe14.knqe.lab.eng.bos.redhat.com"
+            description: Server Host
+        - string:
+            name: SNIC_PORT0
+            default: "p1p1"
+            description: Server nic_port0
+        - string:
+            name: SNIC_PORT1
+            default: "p2p1"
+            description: Server nic_port0
+        - string:
+            name: SNIC_PORT0_80
+            default: "enp5s0f0"
+            description: Server nic_port0
+        - string:
+            name: SNIC_PORT1_80
+            default: "enp5s0f1"
+            description: Server nic_port0
+        - string:
+            name: SNETSCOUT_PORT0
+            default: "NETQE14_P1P1"
+            description: Netscout port 0
+        - string:
+            name: SNETSCOUT_PORT1
+            default: "NETQE14_P1P2"
+            description: Netscout Port 1
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        - string:
+            name: RESERVETIME
+            default: "10000"
+            description: RESERVETIME
+        - string:
+            name: KILLTIMEOVERRIDE
+            default: "9000"
+            description: KILLTIMEOVERRIDE
+        - string:
+            name: NOTES
+            default: ""
+            description: Run Notes
+        - string:
+            name: TEST_INFO
+            default: "20.A"
+            description: "Notes to be added to Beaker job whiteboard"
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+    builders:
+        - shell: |
+            #!/bin/bash
+            echo '****************************** Submit Beaker jobs ************************'
+            cat $WORKSPACE/job1.properties
+            # Use the OVS RPM in the Build parameters
+            # echo 'BREW_ID='$BREW_ID
+            # echo 'build='$build
+            # rpm_location=`brew buildinfo $BREW_ID | grep $build |grep $ARCH`
+            # echo 'OVS_RPM='$rpm_location
+            # echo "$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            # RPM_OVS="$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            echo 'RPM_OVS='$RPM_OVS
+
+            rm -f $WORKSPACE/job1.properties
+            rm -f $WORKSPACE/job1html.txt
+            fdp_release="FDP 18.11"
+            #compose="RHEL-7.7"
+            #RPM_OVS_SELINUX_EXTRA_POLICY=http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/7.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-7.el7fdp.noarch.rpm
+            #########################################################################################
+            # Connect Netscout
+            #########################################################################################
+            cd '/root/NSConnect/NetScout/'
+            cp bos_3903.cfg settings.cfg
+            scl enable rh-python34 'python /root/NSConnect/NetScout/NSConnect.py --connect $CNETSCOUT_PORT0 $SNETSCOUT_PORT0'
+            scl enable rh-python34 'python /root/NSConnect/NetScout/NSConnect.py --connect $CNETSCOUT_PORT1 $SNETSCOUT_PORT1'
+
+            ##########################
+            #Test 1: /kernel/networking/ovs-dpdk/bug1468631 RHEL 7.7 OVS 2.90
+            ##########################
+            rm -f $WORKSPACE/job1html.txt
+            echo "Test 1: sanity_check =============================================="
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job1.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.90] [bug1468631] [ixgbe] [$CHOST] [$SHOST] </whiteboard>
+              <recipeSet priority="Urgent">
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$SHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="SERVERS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="SERVERS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS290_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="SERVER_NIC1_NAME" value="$SNIC_PORT0"/>
+                      <param name="SERVER_NIC2_NAME" value="$SNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.6"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$CHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="CLIENTS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS290_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="CLIENT_NIC1_NAME" value="$CNIC_PORT0"/>
+                      <param name="CLIENT_NIC2_NAME" value="$CNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job1.xml
+            bkr job-submit $WORKSPACE/job1.xml |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 2: /kernel/networking/ovs-dpdk/bug1468631 RHEL 7.7 OVS 2.11
+            ##########################
+            rm -f $WORKSPACE/job2html.txt
+            echo "Test 2: /kernel/networking/ovs-dpdk/bug1468631 RHEL 7.7 OVS 2.11 ============================================="
+            touch $WORKSPACE/job2.xml
+            cat <<EOT > $WORKSPACE/job2.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.11] [bug1468631] [ixgbe] [$CHOST] [$SHOST]</whiteboard>
+              <recipeSet priority="Urgent">
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$SHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="SERVERS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="SERVERS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="SERVER_NIC1_NAME" value="$SNIC_PORT0"/>
+                      <param name="SERVER_NIC2_NAME" value="$SNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.6"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$CHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="CLIENTS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="CLIENT_NIC1_NAME" value="$SNIC_PORT0"/>
+                      <param name="CLIENT_NIC2_NAME" value="$SNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job2.xml
+            bkr job-submit $WORKSPACE/job2.xml |tee $WORKSPACE/bkr_job2.txt
+            grep Submitted $WORKSPACE/bkr_job2.txt >$WORKSPACE/bkr_jobnum2.txt
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job2html.txt
+            BKR_JOBID2html=`cut -d\: -f2 $WORKSPACE/job2html.txt`
+            echo 'BKR_JOBID2html='$BKR_JOBID2html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 3: /kernel/networking/ovs-dpdk/bug1468631 RHEL 8.0 OVS 2.11
+            ##########################
+            rm -f $WORKSPACE/job3html.txt
+            echo "Test 3: /kernel/networking/ovs-dpdk/bug1468631 RHEL 8.0 OVS 2.11============================================="
+            touch $WORKSPACE/job3.xml
+            cat <<EOT > $WORKSPACE/job3.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_81] [OVS 2.11] [bug1468631] [ixgbe] [$CHOST] [$SHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_INFO] [$COMPOSE_81] [OVS 2.11] [bug1468631] [ixgbe] [$CHOST] [$SHOST]" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+                    %post
+                    cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+                    [beaker-postrepo0]
+                    name=beaker-postrepo0
+                    baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+                    enabled=1
+                    gpgcheck=0
+                    skip_if_unavailable=1
+                    EOF
+                    yum install -y $RPM_OVS_SELINUX_EXTRA_80 $RPM_OVS211_80 $RPM_DPDK_80 $RPM_DPDK_TOOLS_80
+                    yum install -y $RPM_DRIVERCTL
+                    yum install -y libvirt
+                    yum install -y qemu-kvm
+                    %end
+                                                                          ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$COMPOSE_81"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$SHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions/>
+                  <task name="/distribution/check-install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_81"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="SERVERS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_80"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="server_NetScout_nic1" value="Dell15_p5p1"/>
+                      <param name="server_NetScout_nic2" value="Dell15_p5p2"/>
+                      <param name="client_NetScout_nic1" value="Dell02_p3p1"/>
+                      <param name="client_NetScout_nic2" value="Dell02_p3p2"/>
+                      <param name="SERVER_NIC1_NAME" value="$SNIC_PORT0_80"/>
+                      <param name="SERVER_NIC2_NAME" value="$SNIC_PORT1_80"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_81"/>
+                                <distro_variant op="=" value="BaseOS"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$CHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_81"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="CLIENTS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_80"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="server_NetScout_nic1" value="Dell15_p5p1"/>
+                      <param name="server_NetScout_nic2" value="Dell15_p5p2"/>
+                      <param name="client_NetScout_nic1" value="Dell02_p3p1"/>
+                      <param name="client_NetScout_nic2" value="Dell02_p3p2"/>
+                      <param name="CLIENT_NIC1_NAME" value="$SNIC_PORT0_80"/>
+                      <param name="CLIENT_NIC2_NAME" value="$SNIC_PORT1_80"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job3.xml
+            bkr job-submit $WORKSPACE/job3.xml |tee $WORKSPACE/bkr_job3.txt
+            grep Submitted $WORKSPACE/bkr_job3.txt >$WORKSPACE/bkr_jobnum3.txt
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job3html.txt
+            BKR_JOBID3html=`cut -d\: -f2 $WORKSPACE/job3html.txt`
+            echo 'BKR_JOBID3html='$BKR_JOBID3html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 4: /kernel/networking/ovs-dpdk/bug1468631 RHEL 7.7 OVS 2.12
+            ##########################
+            rm -f $WORKSPACE/job4html.txt
+            echo "Test 4: ovs-dpdk-tunneling IPv6 GRE ============================================="
+            touch $WORKSPACE/job4.xml
+            cat <<EOT > $WORKSPACE/job4.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.12] [bug1468631] [ixgbe] [$CHOST] [$SHOST]</whiteboard>
+              <recipeSet priority="Urgent">
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$SHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="SERVERS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="SERVERS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS212_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="SERVER_NIC1_NAME" value="$SNIC_PORT0"/>
+                      <param name="SERVER_NIC2_NAME" value="$SNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.6"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_77"/>
+                                <distro_variant op="=" value="Server"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$CHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_77"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="CLIENTS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_77"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_77"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_77"/>
+                      <param name="server_NetScout_nic1" value="NETQE14_P1P1"/>
+                      <param name="server_NetScout_nic2" value="NETQE14_P1P2"/>
+                      <param name="client_NetScout_nic1" value="NETQE18_ENS6F0"/>
+                      <param name="client_NetScout_nic2" value="NETQE18_ENS6F1"/>
+                      <param name="CLIENT_NIC1_NAME" value="$SNIC_PORT0"/>
+                      <param name="CLIENT_NIC2_NAME" value="$SNIC_PORT1"/>
+                      <param name="GUEST_IMG" value="7.7"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_77"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job4.xml
+            bkr job-submit $WORKSPACE/job4.xml |tee $WORKSPACE/bkr_job4.txt
+            grep Submitted $WORKSPACE/bkr_job4.txt >$WORKSPACE/bkr_jobnum4.txt
+            BKR_JOBID4=`cut -d\' -f2 $WORKSPACE/bkr_jobnum4.txt`
+            echo BKR_JOBID4=$BKR_JOBID4 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID4=$BKR_JOBID4 >> $WORKSPACE/job4html.txt
+            BKR_JOBID4html=`cut -d\: -f2 $WORKSPACE/job4html.txt`
+            echo 'BKR_JOBID4html='$BKR_JOBID4html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+            ##########################
+            #Test 5: /kernel/networking/ovs-dpdk/bug1468631 RHEL 8.1 OVS 2.12
+            ##########################
+            rm -f $WORKSPACE/job5html.txt
+            echo "Test 5: /kernel/networking/ovs-dpdk/bug1468631 RHEL 8.1 OVS 2.12"
+            touch $WORKSPACE/job5.xml
+            cat <<EOT > $WORKSPACE/job5.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE_77] [OVS 2.12] [bug1468631] [ixgbe] [$CHOST] [$SHOST]</whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="[$TEST_VER][$COMPOSE_81] /kernel/networking/ovs-dpdk/bug1468631 ovs2.11 fdp $CHOST $SHOST ixgbe nic" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+                    %post
+                    cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+                    [beaker-postrepo0]
+                    name=beaker-postrepo0
+                    baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+                    enabled=1
+                    gpgcheck=0
+                    skip_if_unavailable=1
+                    EOF
+                    yum install -y $RPM_OVS_SELINUX_EXTRA_80 $RPM_OVS212_80 $RPM_DPDK_80 $RPM_DPDK_TOOLS_80
+                    yum install -y $RPM_DRIVERCTL
+                    yum install -y libvirt
+                    yum install -y qemu-kvm
+                    %end
+                                                                          ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$COMPOSE_81"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$SHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions/>
+                  <task name="/distribution/check-install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_81"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="SERVERS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS212_80"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="server_NetScout_nic1" value="Dell15_p5p1"/>
+                      <param name="server_NetScout_nic2" value="Dell15_p5p2"/>
+                      <param name="client_NetScout_nic1" value="Dell02_p3p1"/>
+                      <param name="client_NetScout_nic2" value="Dell02_p3p2"/>
+                      <param name="SERVER_NIC1_NAME" value="$SNIC_PORT0_80"/>
+                      <param name="SERVER_NIC2_NAME" value="$SNIC_PORT1_80"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                </recipe>
+                <recipe whiteboard="" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends/>
+                  <repos/>
+                  <distroRequires>
+                            <and>
+                                <distro_name op="=" value="$COMPOSE_81"/>
+                                <distro_variant op="=" value="BaseOS"/>
+                                <distro_method op="=" value="nfs"/>
+                                <distro_arch op="=" value="x86_64"/>
+                            </and>
+                        </distroRequires>
+                  <hostRequires>
+                            <and>
+                                <hostname op="=" value="$CHOST"/>
+                                <system_type op="=" value="machine"/>
+                            </and>
+                            <or>
+                            </or>
+                            <not>
+                            </not>
+                        </hostRequires>
+                  <partitions>
+                        </partitions>
+                  <task name="/distribution/check-install" role="CLIENTS">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE_81"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/ovs-dpdk/bug1468631" role="CLIENTS">
+                    <params>
+                      <param name="OVS_URL" value="$RPM_OVS211_80"/>
+                      <param name="DPDK_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="server_NetScout_nic1" value="Dell15_p5p1"/>
+                      <param name="server_NetScout_nic2" value="Dell15_p5p2"/>
+                      <param name="client_NetScout_nic1" value="Dell02_p3p1"/>
+                      <param name="client_NetScout_nic2" value="Dell02_p3p2"/>
+                      <param name="CLIENT_NIC1_NAME" value="$SNIC_PORT0_80"/>
+                      <param name="CLIENT_NIC2_NAME" value="$SNIC_PORT1_80"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="$RESERVETIME"/>
+                      <param name="KILLTIMEOVERRIDE" value="$KILLTIMEOVERRIDE"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job5.xml
+            bkr job-submit $WORKSPACE/job5.xml |tee $WORKSPACE/bkr_job5.txt
+            grep Submitted $WORKSPACE/bkr_job5.txt >$WORKSPACE/bkr_jobnum5.txt
+            BKR_JOBID5=`cut -d\' -f2 $WORKSPACE/bkr_jobnum5.txt`
+            echo BKR_JOBID5=$BKR_JOBID5 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID5=$BKR_JOBID5 >> $WORKSPACE/job5html.txt
+            BKR_JOBID5html=`cut -d\: -f2 $WORKSPACE/job5html.txt`
+            echo 'BKR_JOBID5html='$BKR_JOBID5html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo $BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $BKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+
+            #!/bin/bash -x
+            BKR_JOBID2=`cut -d\' -f2 $WORKSPACE/bkr_jobnum2.txt`
+            echo BKR_JOBID2=$BKR_JOBID2 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID2
+            bkr job-results --format junit-xml $BKR_JOBID2 > $WORKSPACE/jobid1.xml
+            TESTS_JOB2=$(grep 'testsuite name' $WORKSPACE/jobid2.xml)
+            echo $TESTS_JOB2
+
+            #####################################################################
+            # Get Beaker Job 2 job-results
+            #####################################################################
+            BKR_TESTS_JOB2_EXEC=0
+            BKR_TESTS_JOB2_FAILED=0
+            for jobid in $BKR_JOBID2; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid2.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid2.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB2_EXEC=$((BKR_TESTS_JOB2_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB2_FAILED=$((BKR_TESTS_JOB2_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB2_EXEC=$BKR_TESTS_JOB2_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB2_FAILED=$BKR_TESTS_JOB2_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB2=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB2_EXEC"'", "failed": "'"$BKR_TESTS_JOB2_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB2
+            echo "BKR_TESTS_JOB2=$BKR_TESTS_JOB2" >> $WORKSPACE/job1.properties
+
+            #echo $?
+            #!/bin/bash -x
+            BKR_JOBID3=`cut -d\' -f2 $WORKSPACE/bkr_jobnum3.txt`
+            echo BKR_JOBID3=$BKR_JOBID3 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID3
+            #echo $?
+            bkr job-results --format junit-xml $BKR_JOBID3 > $WORKSPACE/jobid3.xml
+            TESTS_JOB3=$(grep 'testsuite name' $WORKSPACE/jobid3.xml)
+            echo $TESTS_JOB3
+
+            #####################################################################
+            # Get Beaker Job 3 job-results
+            #####################################################################
+            BKR_TESTS_JOB3_EXEC=0
+            BKR_TESTS_JOB3_FAILED=0
+            for jobid in $BKR_JOBID3; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid3.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid3.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB3_EXEC=$((BKR_TESTS_JOB3_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB3_FAILED=$((BKR_TESTS_JOB3_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB3_EXEC=$BKR_TESTS_JOB3_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB3_FAILED=$BKR_TESTS_JOB3_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB3=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB3_EXEC"'", "failed": "'"$BKR_TESTS_JOB3_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB3
+            echo "BKR_TESTS_JOB3=$BKR_TESTS_JOB3" >> $WORKSPACE/job1.properties
+
+            #####################################################################
+            # Get Beaker Job 4 job-results
+            #####################################################################
+            BKR_TESTS_JOB4_EXEC=0
+            BKR_TESTS_JOB4_FAILED=0
+            for jobid in $BKR_JOBID4; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid4.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid4.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB4_EXEC=$((BKR_TESTS_JOB4_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB4_FAILED=$((BKR_TESTS_JOB4_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB4_EXEC=$BKR_TESTS_JOB4_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB4_FAILED=$BKR_TESTS_JOB4_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB4=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB4_EXEC"'", "failed": "'"$BKR_TESTS_JOB4_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB4
+            echo "BKR_TESTS_JOB4=$BKR_TESTS_JOB4" >> $WORKSPACE/job1.properties
+
+            #####################################################################
+            # Get Beaker Job 5 job-results
+            #####################################################################
+            BKR_TESTS_JOB5_EXEC=0
+            BKR_TESTS_JOB5_FAILED=0
+            for jobid in $BKR_JOBID5; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid5.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid5.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB5_EXEC=$((BKR_TESTS_JOB5_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB5_FAILED=$((BKR_TESTS_JOB5_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB5_EXEC=$BKR_TESTS_JOB5_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB5_FAILED=$BKR_TESTS_JOB5_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB5=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB5_EXEC"'", "failed": "'"$BKR_TESTS_JOB5_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB5
+            echo "BKR_TESTS_JOB5=$BKR_TESTS_JOB5" >> $WORKSPACE/job1.properties
+
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+
+    publishers:
+        - email-ext:
+            recipients: bfubel@redhat.com,ctrautma@redhat.com
+            subject: performace/kernel-qe-ovs-bug1468631-ixgbe-ci $CHOST $SHOST, $Compose77, $BUILD_URL $RPM_OVS290_77
+            body: |
+              Beaker Job "performace/kernel-qe-ovs-bug1468631-ixgbe-ci RHEL 7.7 OVS 2.90" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+              Beaker Job "performace/kernel-qe-ovs-bug1468631-ixgbe-ci RHEL 7.7 OVS 2.11" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID2html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB2_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB2_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB2"}}
+              Beaker Job "performace/kernel-qe-ovs-bug1468631-ixgbe-ci RHEL 8.0 OVS 2.11" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID3html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB3_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB3_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+              Beaker Job "performace/kernel-qe-ovs-bug1468631-ixgbe-ci RHEL 7.7 OVS 2.12" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID4html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB4_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB4_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+              Beaker Job "performace/kernel-qe-ovs-bug1468631-ixgbe-ci RHEL 8.0 OVS 2.12" job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID5html"}} Tests executed=${{ENV,var="BKR_TESTS_JOB5_EXEC"}} Tests failed=${{ENV,var="BKR_TESTS_JOB5_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB3"}}
+              Notes:${{ENV,var="NOTES"}}
+              RHEL7.x OVS_2.90 RPM=${{ENV,var="RPM_OVS290_77"}}
+              RHEL7.x OVS_2.11 RPM=${{ENV,var="RPM_OVS290_77"}}
+              RHEL7.x OVS_2.12 RPM=${{ENV,var="RPM_OVS290_77"}}
+              RHEL8.x OVS_2.11 RPM=${{ENV,var="RPM_OVS290_80"}}
+              RHEL7.x Compose=${{ENV,var="COMPOSE_77"}}
+              RHEL8.x Compose=${{ENV,var="COMPOSE_81"}}
+              Jenkins Job URL https://platform-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/job/performace/job/kernel-qe-ovs-bug1468631-ixgbe-ci/
+
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+        # - workspace-cleanup:
+        # #   include:
+        # #       - "*"
+        # #   exclude:
+        # #       #need resources file to trigger teardown job
+        # #       - "job1.properties.txt"
+        # #   dirmatch: true
+        #     clean-if:
+        #         - success: true
+        #         - not-built: true
+
+
+- project:
+    name: kernel-qe
+    jobs:
+      - 'performace/kernel-qe-ovs-bug1468631-ixgbe-ci'
+###########################################################
+#                        History                          #
+###########################################################
+# Date            Modifier    Details
+# 19-Aug-2019     bfubel    Created off 7.7 Nightly Build
+#                          Need to Change to 8.1 Image. starting with 7.7 to get baseline
+#                          Removed Referance to OVS_RPM. needs to be RPM_OVS
