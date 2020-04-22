@@ -52,6 +52,11 @@
                     - OVS-2.13
               visible-items: 4
               default-value: OVS-2.90,OVS-2.11
+        #######################################  RPM Info ###################################
+        - string:
+            name: TEST_INFO
+            default: "20.C"
+            description: "Notes to be added to Beaker job whiteboard"
         - string:
             name: COMPOSE_77
             default: "RHEL-7.7-20190716.0"
@@ -166,16 +171,13 @@
             description: "Version of Rhel 8.x DPDK used for OVS 2.13"
         - string:
             name: RPM_OVS_SELINUX_EXTRA_77
-            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/15.el7fdp/src/openvswitch-selinux-extra-policy-1.0-15.el7fdp.src.rpm"
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/15.el7fdp/noarch/openvswitch-selinux-extra-policy-1.0-15.el7fdp.noarch.rpm"
             description: "RHEL-7.7 openvswitch-selinux-extra-policy rpm location"
         - string:
             name: RPM_OVS_SELINUX_EXTRA_80
             default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/22.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-22.el8fdp.noarch.rpm"
             description: "RHEL-8.0 openvswitch-selinux-extra-policy rpm location"
-        - string:
-            name: TEST_INFO
-            default: "20.C"
-            description: "Notes to be added to Beaker job whiteboard"
+        #######################################  Client Info ###################################
         - string:
             name: NOTIFY
             default: 'bfubel@redhat.com'
@@ -204,6 +206,7 @@
             name: CNIC_PORT1_8x
             default: "enp3s0f1"
             description: Client nic_port0
+        #######################################  Traffic Generator Info ###################################
         - string:
             name: TREX_PATH
             default: "/root/v2.36/"
@@ -313,7 +316,7 @@
                 test_ovs_rpm=$RPM_OVS211_7x
                 test_compose=$COMPOSE_77
                 test_dpdk=$RPM_DPDK_7x
-                test_dpdk_tools=RPM_DPDK_TOOLS_7x
+                test_dpdk_tools=$RPM_DPDK_TOOLS_7x
                 test_dpdk_ver=$DPDK_VER_7x
                fi
 
@@ -513,7 +516,7 @@
                         <system_type value="Machine"/></hostRequires>
                   <partitions>
                         </partitions>
-                  <task name="/distribution/install" role="STANDALONE">
+                  <task name="/distribution/check-install" role="STANDALONE">
                     <params>
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
@@ -646,7 +649,7 @@
                     <system_type value="Machine"/>
                   </hostRequires>
                   <partitions/>
-                  <task name="/distribution/install" role="STANDALONE"/>
+                  <task name="/distribution/check-install" role="STANDALONE"/>
                  <task name="/kernel/networking/ovs-dpdk/ovs-dpdk-qinq" role="STANDALONE">
                     <params>
                     <param name="QCOW_LOC" value="Westford"/>
