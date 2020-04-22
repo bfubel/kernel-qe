@@ -1,0 +1,413 @@
+- job-template:
+    name: 'performace/kernel-qe-ovs-vsperf-gating-ci'
+    defaults: defaults-build
+    node: 'kernel-qe-ovs'
+    properties:
+        - ownership:
+            owner: bfubel
+            co-owners:
+                - bfubel
+                - bfubel
+    parameters:
+        #######################################  RPM Info ###################################
+        - string:
+            name: TEST_INFO
+            default: "20.C"
+            description: "Notes to be added to Beaker job whiteboard"
+        - string:
+            name: COMPOSE_77
+            default: "RHEL-7.7-20190716.0"
+            description: "RHEL-7.7 compose"
+        - string:
+            name: COMPOSE_78
+            default: "RHEL-7.8-20200225.1"
+            description: "RHEL-7.8 compose"
+        - string:
+            name: COMPOSE_79
+            default: "RHEL-7.9-20200201.n.0"
+            description: "RHEL-7.9 compose"
+        - string:
+            name: COMPOSE_80
+            default: "RHEL-8.0.0-20190321.0"
+            description: "RHEL-8.0 Compose"
+        - string:
+            name: COMPOSE_81
+            default: "RHEL-8.1.0-20191015.0"
+            description: "RHEL-8.1 Compose"
+        - string:
+            name: COMPOSE_811
+            default: "RHEL-8.1.1-2020203.n.0"
+            description: "RHEL-8.1.1 Compose"
+        - string:
+            name: COMPOSE_82
+            default: "RHEL-8.2.0-2020227.0"
+            description: "RHEL-8.2 Compose"
+        - string:
+            name: RPM_OVS290_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch/2.9.0/127.el7fdp/x86_64/openvswitch-2.9.0-127.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.90 RPM"
+        - string:
+            name: RPM_OVS211_7x
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el7fdp/x86_64/openvswitch2.11-2.11.0-50.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_7x
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/23.el7fdp/x86_64/openvswitch2.12-2.12.0-23.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.12 RPM"
+        - string:
+            name: RPM_OVS213_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/1.el7fdp/x86_64/openvswitch2.13-2.13.0-1.el7fdp.x86_64.rpm"
+            description: "RHEL-7.7 OVS 2.13 RPM"
+        - string:
+            name: RPM_OVS211_8x
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.11/2.11.0/50.el8fdp/x86_64/openvswitch2.11-2.11.0-50.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.11 RPM"
+        - string:
+            name: RPM_OVS212_8x
+            default: "http://download.eng.bos.redhat.com/brewroot/packages/openvswitch2.12/2.12.0/23.el8fdp/x86_64/openvswitch2.12-2.12.0-23.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.12 RPM"
+        - string:
+            name: RPM_OVS213_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/6.el8fdp/x86_64/openvswitch2.13-2.13.0-6.el8fdp.x86_64.rpm"
+            description: "RHEL-8.0 OVS 2.13 RPM"
+        - string:
+            name: RPM_OVN211_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el7fdp/x86_64/ovn2.12-2.12.0-36.el7fdp.x86_64.rpm"
+            description: "RHEL-7.X OVN 2.11 RPM"
+        - string:
+            name: RPM_OVN212_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el7fdp/x86_64/ovn2.12-2.12.0-36.el7fdp.x86_64.rpm"
+            description: "RHEL-7.X OVN 2.12 RPM"
+        - string:
+            name: RPM_OVN211_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.11/2.11.1/37.el7fdp/x86_64/ovn2.11-2.11.1-37.el7fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.11 RPM"
+        - string:
+            name: RPM_OVN212_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/ovn2.12/2.12.0/36.el8fdp/x86_64/ovn2.12-2.12.0-36.el8fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.12 RPM"
+        - string:
+            name: RPM_OVN213_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch2.13/2.13.0/6.el8fdp/x86_64/openvswitch2.13-2.13.0-6.el8fdp.x86_64.rpm"
+            description: "RHEL-8.X OVN 2.12 RPM"
+        - string:
+            name: RPM_DRIVERCTL
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/driverctl/0.108/1.el8/noarch/driverctl-0.108-1.el8.noarch.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.5/1.el7_8/x86_64/dpdk-18.11.5-1.el7_8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_TOOLS_7x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.5/1.el7_8/x86_64/dpdk-tools-18.11.5-1.el7_8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-18.11.2-4.el8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_TOOLS_8x
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/18.11.2/4.el8/x86_64/dpdk-tools-18.11.2-4.el8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_8x_213
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/4.el8/x86_64/dpdk-19.11-4.el8.x86_64.rpm"
+            description:
+        - string:
+            name: RPM_DPDK_TOOLS_8x_213
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/dpdk/19.11/4.el8/x86_64/dpdk-tools-19.11-4.el8.x86_64.rpm"
+            description:
+        - string:
+            name: DPDK_VER_7x
+            default: "18.11.5"
+            description: "Version of Rhel 7.x DPDK used"
+        - string:
+            name: DPDK_VER_8x_213
+            default: "19.11"
+            description: "Version of Rhel 8.x DPDK used for OVS 2.13"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_77
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/15.el7fdp/src/openvswitch-selinux-extra-policy-1.0-15.el7fdp.src.rpm"
+            description: "RHEL-7.7 openvswitch-selinux-extra-policy rpm location"
+        - string:
+            name: RPM_OVS_SELINUX_EXTRA_80
+            default: "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch-selinux-extra-policy/1.0/22.el8fdp/noarch/openvswitch-selinux-extra-policy-1.0-22.el8fdp.noarch.rpm"
+            description: "RHEL-8.0 openvswitch-selinux-extra-policy rpm location"
+        #######################################  Client Info ###################################
+        - string:
+            name: CHOST
+            default: "dell-per730-50.rhts.eng.pek2.redhat.com"
+            description: client Host
+        - string:
+            name: CNIC_PORT0
+            default: "enp7s0f0"
+            description: Client nic_port0
+        - string:
+            name: CNIC_PORT1
+            default: "enp7s0f1"
+            description: Client nic_port0
+        - string:
+            name: SHOST
+            default: "dell-per730-15.rhts.eng.pek2.redhat.com"
+            description: Server Host
+        - string:
+            name: SNIC_PORT0
+            default: "p5p1"
+            description: Server nic_port0
+        - string:
+            name: SNIC_PORT1
+            default: "p5p2"
+            description: Server nic_port0
+        #######################################  Traffic Generator Info ###################################
+        - string:
+            name: TREX_PATH
+            default: "/root/v2.36/"
+            description: Server nic_port0
+        - string:
+            name: XENA_IP
+            default: "10.73.88.3"
+            description: Server nic_port0
+        - string:
+            name: XENA_PORT0
+            default: "XENA_M7P0"
+            description: Server nic_port0
+        - string:
+            name: XENA_PORT1
+            default: "XENA_M7P1"
+            description: Server nic_port0
+        - string:
+            name: NETSCOUT_PORT0
+            default: "NETQE22_P6P1"
+            description: Server nic_port0
+        - string:
+            name: NETSCOUT_PORT1
+            default: "NETQE22_P6P2"
+            description: Server nic_port0
+        - string:
+            name: ARCH
+            default: x86_64
+            description: ARCH
+        - string:
+            name: NOTES
+            default: ""
+            description: Run Notes
+    wrappers:
+        - build-name:
+            name: ${{ENV,var="BUILD_TAG"}}
+    builders:
+        - shell: |
+            #!/bin/bash
+            echo '****************************** Submit Beaker jobs ************************'
+            cat $WORKSPACE/job1.properties
+            # Use the OVS RPM in the Build parameters
+            # echo 'BREW_ID='$BREW_ID
+            # echo 'build='$build
+            # rpm_location=`brew buildinfo $BREW_ID | grep $build |grep $ARCH`
+            # echo 'OVS_RPM='$rpm_location
+            # echo "$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            # RPM_OVS="$rpm_location/\/mnt\/redhat/http://download.eng.bos.redhat.com"
+            echo 'RPM_OVS='$RPM_OVS
+            #########################################################################################
+            # Connect Netscout
+            #########################################################################################
+            cd '/root/NSConnect/NetScout/'
+            cp bos_3903.cfg settings.cfg
+            scl enable rh-python34 'python /root/NSConnect/NetScout/NSConnect.py --connect $XENA_PORT0 $SNETSCOUT_PORT0'
+            scl enable rh-python34 'python /root/NSConnect/NetScout/NSConnect.py --connect $XENA_PORT1 $SNETSCOUT_PORT1'
+
+            rm -f $WORKSPACE/job1.properties
+            rm -f $WORKSPACE/job1html.txt
+            ##########################
+            #Test 1: VSPERF_CI Gating [ixgbe] [8.0] [Xena Module 2] [$CHOST]
+            ##########################
+            rm -f $WORKSPACE/job1html.txt
+            echo "Test 1: sanity_check =============================================="
+            touch $WORKSPACE/job1.xml
+            cat <<EOT > $WORKSPACE/job1.xml
+            <job retention_tag="active+1" product="cpe:/o:redhat:enterprise_linux">
+              <whiteboard>[$TEST_INFO] [$COMPOSE80] [$RPM_OVS211_80] [$CHOST] [vsperf CI] [Gateing] </whiteboard>
+              <recipeSet priority="High">
+                <recipe whiteboard="$TEST_INFO netlink test on $COMPOSE80 with  STANDALONE" role="None" ks_meta="harness='restraint-rhts beakerlib'" kernel_options="" kernel_options_post="">
+                  <autopick random="false"/>
+                  <watchdog panic="None"/>
+                  <packages/>
+                  <ks_appends>
+                    <ks_append><![CDATA[
+            %post
+            cat << EOF >/etc/yum.repos.d/beaker-postrepo0.repo
+            [beaker-postrepo0]
+            name=beaker-postrepo0
+            baseurl=http://download.eng.pek2.redhat.com/nightly/latest-BUILDROOT-8-RHEL-8/compose/Buildroot/x86_64/os
+            enabled=1
+            gpgcheck=0
+            skip_if_unavailable=1
+            EOF
+            yum install -y $RPM_OVS_SELINUX_EXTRA_80 $RPM_OVS211_80 $RPM_DPDK_80 $RPM_DPDK_TOOLS_80
+            yum install -y $RPM_DRIVERCTL
+            yum install -y libvirt
+            yum install -y qemu-kvm
+            %end
+                                                                          ]]></ks_append>
+                  </ks_appends>
+                  <repos/>
+                  <distroRequires>
+                    <and>
+                      <distro_name op="=" value="$COMPOSE80"/>
+                      <distro_variant op="=" value="BaseOS"/>
+                      <distro_arch op="=" value="x86_64"/>
+                    </and>
+                  </distroRequires>
+                  <hostRequires>
+                    <and>
+                      <hostname value="$CHOST" op="="/>
+                    </and>
+                    <system_type value="Machine"/>
+                  </hostRequires>
+                  <partitions>
+                        <partitions/>
+                  <task name="/distribution/install" role="STANDALONE">
+                    <params>
+                      <param name="DISTRO_BUILD" value="$COMPOSE80"/>
+                    </params>
+                  </task>
+                  <task name="/kernel/networking/vsperf/vsperf_CI" role="STANDALONE">
+                    <params>
+                      <param name="ISOLCPUS" value="2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70"/>
+                      <param name="DPDK_HOST_URL" value="$RPM_DPDK_80"/>
+                      <param name="DPDK_TOOL_HOST_URL" value="$RPM_DPDK_TOOLS_80"/>
+                      <param name="OVS_URL" value="$RPM_OVS211_80"/>
+                      <param name="RUN_JOB" value="gating"/>
+                      <param name="QCOW_LOC" value="China"/>
+                      <param name="image_method" value="download"/>
+                      <param name="TREX_SPEED" value="10"/>
+                      <param name="TREX_PORT_SPEED" value="10000"/>
+                      <param name="TREX_PATH" value="$TREX_PATH"/>
+                      <param name="rxq_assign" value="false"/>
+                      <param name="GUEST_IMG" value="8.0"/>
+                      <param name="NIC_DRIVER" value="ixgbe"/>
+                      <param name="TREX_IP" value="10.73.88.37"/>
+                      <param name="LOSSRATE" value="0"/>
+                      <param name="QEMU_VER" value="212"/>
+                      <param name="TREX_PORT1" value="a0:36:9f:78:f5:58"/>
+                      <param name="TREX_PORT2" value="a0:36:9f:78:f5:5a"/>
+                      <param name="VANILLA_TGEN_PORT1_MAC" value="a0:36:9f:78:f5:58"/>
+                      <param name="VANILLA_TGEN_PORT2_MAC" value="a0:36:9f:78:f5:5a"/>
+                      <param name="NIC1_MAC" value="70:7d:b9:30:d0:3c"/>
+                      <param name="NIC2_MAC" value="70:7d:b9:30:d0:3d"/>
+                      <param name="CUSTOM_CONF" value="custom_conf_rhel8"/>
+                      <param name="NetScout_nic1" value="Dell50_p5p1"/>
+                      <param name="NetScout_nic2" value="Dell50_p5p2"/>
+                      <param name="Trex_nic1" value="Dell01_p3p1"/>
+                      <param name="Trex_nic2" value="Dell01_p3p2"/>
+                      <param name="NIC1" value="$CNIC_PORT0"/>
+                      <param name="NIC2" value="$CNIC_PORT1"/>
+                      <param name="guest_dpdk_version" value="1811-4"/>
+                      <param name="verification" value="no"/>
+                      <param name="nightly_viommu" value="enable"/>
+                      <param name="selinux_policy_rpm" value="$RPM_OVS_SELINUX_EXTRA_80"/>
+                      <param name="TRAFFIC_GEN" value="xena"/>
+                      <param name="XENA_IP" value="$XENA_IP"/>
+                      <param name="XENA_MODULE1" value="2"/>
+                      <param name="XENA_MODULE2" value="2"/>
+                    </params>
+                  </task>
+                  <task name="/distribution/reservesys" role="STANDALONE">
+                    <params>
+                      <param name="RESERVETIME" value="86400"/>
+                    </params>
+                  </task>
+                </recipe>
+              </recipeSet>
+            </job>
+            EOT
+            cat $WORKSPACE/job1.xml
+            bkr job-submit $WORKSPACE/job1.xml |tee $WORKSPACE/bkr_job1.txt
+            grep Submitted $WORKSPACE/bkr_job1.txt >$WORKSPACE/bkr_jobnum1.txt
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1.properties
+            echo BKR_JOBID1=$BKR_JOBID1 >> $WORKSPACE/job1html.txt
+            BKR_JOBID1html=`cut -d\: -f2 $WORKSPACE/job1html.txt`
+            echo 'BKR_JOBID1html='$BKR_JOBID1html >> $WORKSPACE/job1.properties
+            echo ARCH=$ARCH >> $WORKSPACE/job1.properties
+
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+        - shell: |
+            #!/bin/bash -x
+            BKR_JOBID1=`cut -d\' -f2 $WORKSPACE/bkr_jobnum1.txt`
+            echo $BKR_JOBID1 >> $WORKSPACE/job1.properties
+            bkr job-watch $BKR_JOBID1
+            bkr job-results --format junit-xml $BKR_JOBID1 > $WORKSPACE/jobid1.xml
+            TESTS_JOB1=$(grep 'testsuite name' $WORKSPACE/jobid1.xml)
+            echo $TESTS_JOB1
+
+            #####################################################################
+            # Get Beaker Job 1 job-results
+            #####################################################################
+            BKR_TESTS_JOB1_EXEC=0
+            BKR_TESTS_JOB1_FAILED=0
+            for jobid in $BKR_JOBID1; do
+                bkr job-results --format junit-xml $jobid > $WORKSPACE/$jobid1.xml
+                    for testsuite in $(grep hostname $WORKSPACE/$jobid1.xml); do
+                        echo $testsuite | grep tests= && BKR_TESTS_JOB1_EXEC=$((BKR_TESTS_JOB1_EXEC+$(echo $testsuite | cut -d'"' -f2)))
+                        echo $testsuite | grep failures= && BKR_TESTS_JOB1_FAILED=$((BKR_TESTS_JOB1_FAILED+$(echo $testsuite | cut -d'"' -f2)))
+                    done
+                done
+            echo BKR_TESTS_JOB1_EXEC=$BKR_TESTS_JOB1_EXEC >> $WORKSPACE/job1.properties
+            echo BKR_TESTS_JOB1_FAILED=$BKR_TESTS_JOB1_FAILED >> $WORKSPACE/job1.properties
+            BKR_TESTS_JOB1=('[{{"executor": "beaker", "arch": "'"$ARCH"'", "executed": "'"$BKR_TESTS_JOB1_EXEC"'", "failed": "'"$BKR_TESTS_JOB1_FAILED"'"}}]')
+            echo $BKR_TESTS_JOB1
+            echo "BKR_TESTS_JOB1=$BKR_TESTS_JOB1" >> $WORKSPACE/job1.properties
+
+            # #####################################################################
+            # # Get Final -results
+            # #####################################################################
+            # BKR_TESTS_EXEC=$((BKR_TESTS_JOB1_EXEC+BKR_TESTS_JOB2_EXEC+BKR_TESTS_JOB3_EXEC)) || BKR_TESTS_EXEC=0
+            # echo "BKR_TESTS_EXEC=$BKR_TESTS_EXEC" >> $WORKSPACE/job1.properties
+            # echo "BKR_TESTS_EXEC=$BKR_TESTS_EXEC"
+            # BKR_TESTS_FAILED=$((BKR_TESTS_JOB1_FAILED+BKR_TESTS_JOB2_FAILED+BKR_TESTS_JOB3_FAILED)) || BKR_TESTS_FAILED=-1
+            # echo "BKR_TESTS_FAILED=$BKR_TESTS_FAILED" >> $WORKSPACE/job1.properties
+            # echo "BKR_TESTS_FAILED=$BKR_TESTS_FAILED"
+
+        # inject when all the env varables are all defined ??
+        - inject:
+            properties-file: $WORKSPACE/job1.properties
+
+
+    publishers:
+        - email-ext:
+            recipients: bfubel@redhat.com
+            subject: performace/kernel-qe-ovs-vsperf-gating-ci $CHOST $SHOST, $COMPOSE80, $BUILD_URL $RPM_OVS211_80
+            body: |
+              Beaker Job "performace/VSPERF_CI Gating IXGBE " job at https://beaker.engineering.redhat.com/jobs/${{ENV,var="BKR_JOBID1html"}} Executed=${{ENV,var="BKR_TESTS_JOB1_EXEC"}} Failed=${{ENV,var="BKR_TESTS_JOB1_FAILED"}}
+                          Results ${{ENV,var="BKR_TESTS_JOB1"}}
+              Notes:{{ENV,var="NOTES"}}
+
+
+            notify-every-unstable-build: false
+            send-to-individuals: true
+            always: true
+        # - workspace-cleanup:
+        # #   include:
+        # #       - "*"
+        # #   exclude:
+        # #       #need resources file to trigger teardown job
+        # #       - "job1.properties.txt"
+        # #   dirmatch: true
+        #     clean-if:
+        #         - success: true
+        #         - not-built: true
+
+
+- project:
+    name: kernel-qe
+    jobs:
+      - 'performace/kernel-qe-ovs-vsperf-gating-ci'
+###########################################################
+#                        History                          #
+###########################################################
+# Date            Modifier    Details
+# 22-sep-2019     bfubel    Created off ovs-dodk-tunneling-ci
+#                          
+#                          
