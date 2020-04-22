@@ -333,7 +333,7 @@
                 test_ovs_rpm=$RPM_OVS211_7x
                 test_compose=$COMPOSE_77
                 test_dpdk=$RPM_DPDK_7x
-                test_dpdk_tools=RPM_DPDK_TOOLS_7x
+                test_dpdk_tools=$RPM_DPDK_TOOLS_7x
                 test_dpdk_ver=$DPDK_VER_7x
                fi
 
@@ -511,7 +511,7 @@
               </notify>
               <whiteboard>[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$CHOST] [$SHOST] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4] </whiteboard>
               <recipeSet priority="Urgent">
-                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$SHOST] [SERVERS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4]" role=SERVERS "None" ks_meta="" kernel_options="" kernel_options_post="">
+                <recipe whiteboard="[$TEST_INFO] [ovs-dpdk-tunneling] [i40e-mlx4] [$SHOST] [SERVERS] [$test_compose] [Performace] [$test_ovs_rpm] [gre] [ipv4]" role="None" ks_meta="" kernel_options="" kernel_options_post="">
                   <autopick random="false"/>
                   <watchdog panic="None"/>
                   <packages/>
@@ -537,7 +537,7 @@
                         </hostRequires>
                   <partitions>
                         </partitions>
-                  <task name="/distribution/install" role="SERVERS">
+                  <task name="/distribution/check-install" role="SERVERS">
                     <params>
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
@@ -597,7 +597,7 @@
                         </hostRequires>
                   <partitions>
                         </partitions>
-                  <task name="/distribution/install" role="CLIENTS">
+                  <task name="/distribution/check-install" role="CLIENTS">
                     <params>
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
@@ -635,7 +635,7 @@
               </recipeSet>
             </job>
             EOT
-            #cat $WORKSPACE/job.xml
+            cat $WORKSPACE/job.xml
             bkr job-submit $WORKSPACE/job.xml |tee $WORKSPACE/bkr_job.txt
             grep Submitted $WORKSPACE/bkr_job.txt >$WORKSPACE/bkr_jobnum.txt
             BKR_JOBID=`cut -d\' -f2 $WORKSPACE/bkr_jobnum.txt`
@@ -733,7 +733,7 @@
                     <system_type value="Machine"/>
                   </hostRequires>
                   <partitions/>
-                  <task name="/distribution/install" role="SERVERS">
+                  <task name="/distribution/check-install" role="SERVERS">
                     <params>
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
@@ -799,7 +799,7 @@
                     <system_type value="Machine"/>
                   </hostRequires>
                   <partitions/>
-                  <task name="/distribution/install" role="CLIENTS">
+                  <task name="/distribution/check-install" role="CLIENTS">
                     <params>
                       <param name="DISTRO_BUILD" value="$test_compose"/>
                     </params>
